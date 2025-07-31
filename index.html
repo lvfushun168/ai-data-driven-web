@@ -3,408 +3,806 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>洞察驱动系统 - InsightDrive</title>
+    <title>OASIS - 多源信息聚合与洞察驱动系统</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-cloud@1.2.5/build/d3.layout.cloud.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
+
     <style>
         :root {
-            --bg-color: #0a0e1a;
-            --panel-color: #1a1f36;
-            --border-color: rgba(67, 72, 98, 0.7);
-            --primary-glow: #00f6ff;
-            --secondary-glow: #7a5fff;
-            --text-primary: #e0e7ff;
-            --text-secondary: #a8b2d3;
+            --bg-color: #0a0a1a;
+            --primary-color: #00f2ff;
+            --secondary-color: #ff00ff;
+            --border-color: rgba(0, 242, 255, 0.2);
+            --card-bg: rgba(10, 20, 40, 0.5);
+            --glow-color-primary: rgba(0, 242, 255, 0.5);
+            --glow-color-secondary: rgba(255, 0, 255, 0.5);
         }
 
         body {
-            font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-primary);
-            overflow: hidden;
-        }
-        
-        #background-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: linear-gradient(45deg, rgba(10, 14, 26, 0.95) 0%, rgba(26, 31, 54, 0.95) 100%);
+            color: #e0e0e0;
+            font-family: 'Noto Sans SC', sans-serif;
+            overflow-x: hidden;
         }
 
-        .panel {
-            background-color: var(--panel-color);
-            border: 1px solid var(--border-color);
-            border-radius: 1rem;
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .glassmorphism {
+            background: var(--card-bg);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 0 15px rgba(0, 246, 255, 0.1), 0 0 30px rgba(122, 95, 255, 0.1);
-            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2), 0 0 5px var(--glow-color-primary);
         }
 
-        .panel:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 25px rgba(0, 246, 255, 0.2), 0 0 50px rgba(122, 95, 255, 0.2);
-        }
-
-        .glow-text {
-            text-shadow: 0 0 5px var(--primary-glow), 0 0 10px var(--primary-glow);
+        .neon-text-primary {
+            color: var(--primary-color);
+            text-shadow: 0 0 5px var(--primary-color), 0 0 10px var(--primary-color), 0 0 15px var(--glow-color-primary);
         }
         
+        .neon-text-secondary {
+            color: var(--secondary-color);
+            text-shadow: 0 0 5px var(--secondary-color), 0 0 10px var(--secondary-color), 0 0 15px var(--glow-color-secondary);
+        }
+
+        .neon-border {
+            border: 1px solid var(--primary-color);
+            box-shadow: 0 0 8px var(--glow-color-primary), inset 0 0 8px var(--glow-color-primary);
+        }
+        
+        .neon-border-secondary {
+            border: 1px solid var(--secondary-color);
+            box-shadow: 0 0 8px var(--glow-color-secondary), inset 0 0 8px var(--glow-color-secondary);
+        }
+
+        .sidebar-icon {
+            transition: all 0.3s ease;
+        }
+        .sidebar-icon:hover, .sidebar-item.active .sidebar-icon {
+            color: var(--primary-color);
+            transform: scale(1.1);
+            text-shadow: 0 0 10px var(--glow-color-primary);
+        }
+        
+        .sidebar-item.active {
+            background: linear-gradient(90deg, rgba(0, 242, 255, 0.15) 0%, rgba(0, 242, 255, 0) 100%);
+            border-right: 3px solid var(--primary-color);
+        }
+
         .btn-primary {
-            background: linear-gradient(45deg, var(--primary-glow), var(--secondary-glow));
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             color: white;
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            font-weight: 600;
+            border: none;
             transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(0, 246, 255, 0.3);
+            box-shadow: 0 0 10px var(--glow-color-primary), 0 0 10px var(--glow-color-secondary);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px var(--glow-color-primary), 0 0 15px var(--glow-color-secondary);
         }
 
-        .btn-primary:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(0, 246, 255, 0.6);
-        }
-        
         .btn-secondary {
             background-color: transparent;
-            border: 1px solid var(--primary-glow);
-            color: var(--primary-glow);
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            font-weight: 500;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
             transition: all 0.3s ease;
         }
-        
         .btn-secondary:hover {
-            background-color: rgba(0, 246, 255, 0.1);
-            box-shadow: 0 0 15px rgba(0, 246, 255, 0.3);
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: var(--primary-glow);
-            border-radius: 3px;
+            background-color: rgba(0, 242, 255, 0.1);
+            box-shadow: 0 0 8px var(--glow-color-primary);
         }
         
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: linear-gradient(45deg, var(--primary-glow), var(--secondary-glow));
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            z-index: 1000;
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00ffff;
+        }
+        
+        /* Animation for cards */
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
             opacity: 0;
-            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-            box-shadow: 0 0 20px rgba(0, 246, 255, 0.5);
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
+        /* Toast Notification */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
         .toast.show {
-            transform: translateX(-50%) translateY(0);
             opacity: 1;
+            transform: translateX(0);
         }
         
-        .nav-link.active {
-            background-color: rgba(0, 246, 255, 0.2) !important;
-            border: 1px solid var(--primary-glow);
-            color: white !important;
-            font-weight: 600;
+        /* Switch toggle */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #334155;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--primary-color);
+            box-shadow: 0 0 5px var(--glow-color-primary);
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
         }
     </style>
 </head>
-<body class="w-screen h-screen p-4 flex gap-4">
+<body class="flex min-h-screen">
 
-    <div id="background-animation"></div>
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
 
-    <!-- 左侧导航栏 -->
-    <aside class="w-64 h-full flex flex-col gap-4">
-        <div class="panel p-4 flex-shrink-0 flex items-center gap-3">
-            <svg class="w-10 h-10 text-cyan-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            <div>
-                <h1 class="text-xl font-bold text-white">InsightDrive</h1>
-                <p class="text-xs text-cyan-400 glow-text">洞察驱动系统</p>
-            </div>
+    <!-- Sidebar -->
+    <aside class="w-20 lg:w-64 bg-gray-900/30 p-4 lg:p-6 flex flex-col items-center lg:items-start shrink-0 border-r border-gray-800">
+        <div class="flex items-center gap-2 mb-12">
+            <svg class="w-10 h-10 neon-text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 7L12 12L22 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 12V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <h1 class="font-orbitron text-2xl font-bold hidden lg:block">OASIS</h1>
         </div>
-        <nav id="main-nav" class="panel p-4 flex-grow custom-scrollbar overflow-y-auto">
-            <h2 class="text-sm font-semibold text-gray-400 mb-4">工作空间</h2>
-            <ul class="space-y-2">
-                <li><a href="#" data-view="global-overview" class="nav-link flex items-center gap-3 p-2 rounded-lg text-gray-300 hover:bg-purple-500/10 active">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                    <span>全局概览</span>
-                </a></li>
-                <li><a href="#" data-view="phoenix-project" class="nav-link flex items-center gap-3 p-2 rounded-lg text-gray-300 hover:bg-purple-500/10">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>
-                    <span>"凤凰"项目群</span>
-                </a></li>
-                <li><a href="#" data-view="q3-marketing" class="nav-link flex items-center gap-3 p-2 rounded-lg text-gray-300 hover:bg-purple-500/10">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" x2="8" y1="13" y2="13"></line><line x1="16" x2="8" y1="17" y2="17"></line><line x1="10" x2="8" y1="9" y2="9"></line></svg>
-                    <span>Q3市场活动监控</span>
-                </a></li>
-                <li><a href="#" data-view="faq-kb" class="nav-link flex items-center gap-3 p-2 rounded-lg text-gray-300 hover:bg-purple-500/10">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" x2="12.01" y1="17" y2="17"></line></svg>
-                    <span>售后FAQ知识库</span>
-                </a></li>
-            </ul>
-            <button class="w-full mt-6 btn-secondary flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg>
-                <span>新建工作空间</span>
-            </button>
+        <nav class="w-full flex flex-col gap-4">
+            <a href="#dashboard" class="sidebar-item active p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('dashboard', this)">
+                <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                <span class="hidden lg:inline">仪表盘</span>
+            </a>
+            <a href="#data-sources" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('data-sources', this)">
+                <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <span class="hidden lg:inline">数据源管理</span>
+            </a>
+            <a href="#insight-engine" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('insight-engine', this)">
+                <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.373 3.373 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                <span class="hidden lg:inline">AI洞察引擎</span>
+            </a>
+            <a href="#action-center" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('action-center', this)">
+                <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <span class="hidden lg:inline">自动化行动中心</span>
+            </a>
+            <a href="#knowledge-base" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('knowledge-base', this)">
+                 <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path><path d="M12 3v18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                <span class="hidden lg:inline">知识沉淀库</span>
+            </a>
         </nav>
-        <div class="panel p-4 flex-shrink-0">
-             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <img src="https://placehold.co/40x40/7a5fff/ffffff?text=U" class="rounded-full">
-                    <div>
-                        <p class="font-semibold text-white">王经理</p>
-                        <p class="text-xs text-gray-400">项目总监</p>
-                    </div>
-                </div>
-                <button class="text-gray-400 hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path><path d="M10.73 21.9a2 2 0 0 1-2.24-2.24 2 2 0 0 1 2.24-2.24 2 2 0 0 1 2.24 2.24 2 2 0 0 1-2.24 2.24z"></path><path d="m19.07 4.93-1.41 1.41"></path><path d="M19.07 19.07 17.66 17.66"></path><path d="m4.93 19.07 1.41-1.41"></path><path d="M4.93 4.93 6.34 6.34"></path><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="M2 12h2"></path><path d="M20 12h2"></path></svg>
-                </button>
-             </div>
+        <div class="mt-auto w-full">
+            <a href="#settings" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('settings', this)">
+                <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span class="hidden lg:inline">平台设置</span>
+            </a>
         </div>
     </aside>
 
-    <!-- 中间主内容区 -->
-    <main class="flex-grow h-full flex flex-col gap-4">
+    <!-- Main Content -->
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
         
-        <!-- View: 全局概览 -->
-        <div id="view-global-overview" class="view-container h-full flex flex-col gap-4">
-            <header class="panel p-4 flex-shrink-0 flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-white">全局概览</h1>
-                <div class="flex items-center gap-4">
-                    <div class="relative">
-                        <input type="text" placeholder="全局搜索洞察..." class="bg-gray-900/50 border border-gray-700 rounded-lg py-2 px-4 w-64 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"><circle cx="11" cy="11" r="8"></circle><line x1="21" x2="16.65" y1="21" y2="16.65"></line></svg>
-                    </div>
-                    <button class="btn-primary">生成全局报告</button>
-                </div>
+        <!-- View: Dashboard -->
+        <div id="view-dashboard" class="view-content">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold font-orbitron">全局态势仪表盘</h2>
+                <p class="text-gray-400">实时洞察所有信息源的动态与趋势</p>
             </header>
-            <div class="flex-grow h-0 grid grid-cols-3 grid-rows-2 gap-4">
-                <div class="panel p-4 col-span-1 row-span-1 flex flex-col"><h3 class="font-semibold text-white mb-2">全域情感分布</h3><div id="sentiment-chart" class="flex-grow"></div></div>
-                <div class="panel p-4 col-span-1 row-span-1 flex flex-col"><h3 class="font-semibold text-white mb-2">热门话题云</h3><div id="wordcloud-chart" class="flex-grow flex items-center justify-center"><p class="text-gray-400">正在生成词云...</p></div></div>
-                <div class="panel p-4 col-span-1 row-span-1 flex flex-col"><h3 class="font-semibold text-white mb-2">AI生成任务概览</h3><div class="space-y-3 mt-2"><div class="flex justify-between items-center"><span class="text-lg font-bold text-cyan-400">12</span><p class="text-gray-300">待处理</p></div><div class="w-full bg-gray-700 rounded-full h-2.5"><div class="bg-cyan-400 h-2.5 rounded-full" style="width: 45%"></div></div></div><div class="space-y-3 mt-4"><div class="flex justify-between items-center"><span class="text-lg font-bold text-purple-400">8</span><p class="text-gray-300">进行中</p></div><div class="w-full bg-gray-700 rounded-full h-2.5"><div class="bg-purple-400 h-2.5 rounded-full" style="width: 30%"></div></div></div><div class="space-y-3 mt-4"><div class="flex justify-between items-center"><span class="text-lg font-bold text-green-400">25</span><p class="text-gray-300">已完成</p></div><div class="w-full bg-gray-700 rounded-full h-2.5"><div class="bg-green-400 h-2.5 rounded-full" style="width: 85%"></div></div></div></div>
-                <div class="panel p-4 col-span-3 row-span-1 flex flex-col custom-scrollbar overflow-y-auto"><h3 class="font-semibold text-white mb-3">实时洞察流</h3><div class="space-y-4"><div class="p-3 rounded-lg bg-gray-900/50 border border-gray-700 flex items-start gap-4"><div class="w-10 h-10 rounded-full bg-blue-500 flex-shrink-0 flex items-center justify-center font-bold">钉</div><div><p class="text-sm text-white">【"凤凰"项目群】AI摘要：会议结论已达成，新版UI将在下周三前交付。 <span class="text-cyan-400 font-semibold">[决策]</span></p><p class="text-xs text-gray-400 mt-1">2分钟前</p></div></div><div class="p-3 rounded-lg bg-gray-900/50 border border-gray-700 flex items-start gap-4"><div class="w-10 h-10 rounded-full bg-red-500 flex-shrink-0 flex items-center justify-center font-bold text-white">贴</div><div><p class="text-sm text-white">【XX汽车贴吧】用户'车神888'反馈，新款车机系统在低温下有卡顿现象。 <span class="text-red-400 font-semibold">[负面舆情]</span></p><p class="text-xs text-gray-400 mt-1">5分钟前</p></div></div><div class="p-3 rounded-lg bg-gray-900/50 border border-gray-700 flex items-start gap-4"><div class="w-10 h-10 rounded-full bg-green-500 flex-shrink-0 flex items-center justify-center font-bold">知</div><div><p class="text-sm text-white">【"如何看待XX技术"】KOL'技术大牛'发布长文，高度评价我司技术路线。 <span class="text-green-400 font-semibold">[正面舆情]</span></p><p class="text-xs text-gray-400 mt-1">12分钟前</p></div></div><div class="p-3 rounded-lg bg-gray-900/50 border border-gray-700 flex items-start gap-4"><div class="w-10 h-10 rounded-full bg-blue-500 flex-shrink-0 flex items-center justify-center font-bold">钉</div><div><p class="text-sm text-white">【"凤凰"项目群】AI识别任务：<span class="font-semibold text-yellow-400">@张伟</span> 需在本周五前完成API文档初稿。 <span class="text-yellow-400 font-semibold">[待办]</span></p><p class="text-xs text-gray-400 mt-1">28分钟前</p></div></div></div></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                <!-- Key Metrics -->
+                <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.1s;">
+                    <h3 class="text-gray-400 text-lg">新增待办 (ToDo)</h3>
+                    <p class="text-4xl font-bold neon-text-primary mt-2">12</p>
+                    <p class="text-sm text-green-400 mt-1">+3 since last login</p>
+                </div>
+                <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.2s;">
+                    <h3 class="text-gray-400 text-lg">关键决策点</h3>
+                    <p class="text-4xl font-bold neon-text-primary mt-2">4</p>
+                     <p class="text-sm text-gray-400 mt-1">本周已识别</p>
+                </div>
+                <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.3s;">
+                    <h3 class="text-gray-400 text-lg">高优告警</h3>
+                    <p class="text-4xl font-bold neon-text-secondary mt-2">2</p>
+                    <p class="text-sm text-red-400 mt-1">用户负面情绪激增</p>
+                </div>
+                <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.4s;">
+                    <h3 class="text-gray-400 text-lg">知识库新增</h3>
+                    <p class="text-4xl font-bold neon-text-primary mt-2">27</p>
+                    <p class="text-sm text-gray-400 mt-1">自动归档FAQ和案例</p>
+                </div>
+
+                <!-- Main Chart -->
+                <div class="md:col-span-2 xl:col-span-2 glassmorphism rounded-xl p-6 flex flex-col fade-in-up" style="animation-delay: 0.5s;">
+                    <h3 class="text-xl font-bold mb-4">信息流动 & 情感趋势 (近7天)</h3>
+                    <div class="relative h-64">
+                        <canvas id="sentimentChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Topic Cloud -->
+                <div class="md:col-span-2 xl:col-span-2 glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.6s;">
+                    <h3 class="text-xl font-bold mb-4">热点主题词云</h3>
+                    <div id="wordCloud" class="w-full h-64"></div>
+                </div>
+
+                <!-- Recent Summaries -->
+                <div class="xl:col-span-4 glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.7s;">
+                    <h3 class="text-xl font-bold mb-4">最新AI摘要</h3>
+                    <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
+                        <div class="p-4 bg-gray-900/50 rounded-lg border-l-4 border-cyan-400">
+                            <div class="flex justify-between items-center mb-1">
+                                <h4 class="font-bold text-cyan-300">【钉钉】鲲鹏V3.5项目冲刺群</h4>
+                                <span class="text-xs text-gray-500">5分钟前</span>
+                            </div>
+                            <p class="text-sm text-gray-300">摘要：会议确定了下周交付的最终checklist，@张伟 负责的渲染引擎优化需在周三前完成。发现一个潜在风险：供应链芯片可能延迟到货。</p>
+                            <div class="mt-2 flex gap-2">
+                                <span class="text-xs bg-cyan-900 text-cyan-300 px-2 py-1 rounded">决策点</span>
+                                <span class="text-xs bg-yellow-900 text-yellow-300 px-2 py-1 rounded">风险预警</span>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-gray-900/50 rounded-lg border-l-4 border-purple-400">
+                            <div class="flex justify-between items-center mb-1">
+                                <h4 class="font-bold text-purple-300">【汽车之家】NE-900车型论坛</h4>
+                                <span class="text-xs text-gray-500">30分钟前</span>
+                            </div>
+                            <p class="text-sm text-gray-300">摘要：大量用户集中讨论新的OTA升级，普遍反馈续航有提升，但对车机系统卡顿的抱怨增多。KOL“车长老”发布了详细评测，指出智能驾驶辅助在雨天表现不佳。</p>
+                             <div class="mt-2 flex gap-2">
+                                <span class="text-xs bg-green-900 text-green-300 px-2 py-1 rounded">正面反馈</span>
+                                <span class="text-xs bg-red-900 text-red-300 px-2 py-1 rounded">产品槽点</span>
+                            </div>
+                        </div>
+                         <div class="p-4 bg-gray-900/50 rounded-lg border-l-4 border-green-400">
+                            <div class="flex justify-between items-center mb-1">
+                                <h4 class="font-bold text-green-300">【知乎】关于新能源汽车电池技术讨论</h4>
+                                <span class="text-xs text-gray-500">1小时前</span>
+                            </div>
+                            <p class="text-sm text-gray-300">摘要：关于固态电池的讨论成为热点，多数观点认为5年内难以商业化。有用户建议公司可以开放电池健康度检测的更多数据给车主。</p>
+                             <div class="mt-2 flex gap-2">
+                                <span class="text-xs bg-blue-900 text-blue-300 px-2 py-1 rounded">技术趋势</span>
+                                <span class="text-xs bg-purple-900 text-purple-300 px-2 py-1 rounded">功能建议</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- View: Data Sources -->
+        <div id="view-data-sources" class="view-content hidden">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold font-orbitron">数据源连接器管理</h2>
+                <p class="text-gray-400">可插拔式设计，轻松连接、配置和管理您的信息来源。</p>
+            </header>
+            <div class="mb-6 text-right">
+                <button class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="showToast('模拟操作：打开连接器市场')">
+                    + 添加新的数据源
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Data Source Cards -->
+                <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up">
+                    <img src="https://img.icons8.com/color/96/000000/dingtalk.png" class="w-16 h-16 mb-4" alt="钉钉图标"/>
+                    <h3 class="text-xl font-bold">钉钉</h3>
+                    <p class="text-sm text-green-400 font-bold my-2">已连接 (5个群聊)</p>
+                    <p class="text-xs text-gray-400 flex-grow">实时同步内部项目群、售后支持群的对话。</p>
+                    <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
+                </div>
+                <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up" style="animation-delay: 0.1s;">
+                    <img src="https://img.icons8.com/color/96/wecom.png" class="w-16 h-16 mb-4" alt="企业微信图标"/>
+                    <h3 class="text-xl font-bold">企业微信</h3>
+                    <p class="text-sm text-green-400 font-bold my-2">已连接 (2个群聊)</p>
+                    <p class="text-xs text-gray-400 flex-grow">同步销服团队与客户的沟通记录。</p>
+                    <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
+                </div>
+                <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up" style="animation-delay: 0.2s;">
+                    <img src="https://placehold.co/96x96/1a202c/00f2ff?text=知" class="w-16 h-16 mb-4 rounded-full" alt="知乎图标"/>
+                    <h3 class="text-xl font-bold">知乎</h3>
+                    <p class="text-sm text-green-400 font-bold my-2">已连接</p>
+                    <p class="text-xs text-gray-400 flex-grow">监控与品牌、技术相关的热门问题和回答。</p>
+                    <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
+                </div>
+                <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up" style="animation-delay: 0.3s;">
+                    <img src="https://placehold.co/96x96/1a202c/00f2ff?text=家" class="w-16 h-16 mb-4 rounded-full" alt="汽车之家图标"/>
+                    <h3 class="text-xl font-bold">汽车之家</h3>
+                    <p class="text-sm text-yellow-400 font-bold my-2">连接中...</p>
+                    <p class="text-xs text-gray-400 flex-grow">实时追踪核心车型论坛的长帖和用户反馈。</p>
+                    <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
+                </div>
+                <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up opacity-60" style="animation-delay: 0.4s;">
+                     <img src="https://img.icons8.com/color/96/weibo.png" class="w-16 h-16 mb-4" alt="微博图标"/>
+                    <h3 class="text-xl font-bold">微博</h3>
+                    <p class="text-sm text-gray-500 font-bold my-2">未连接</p>
+                    <p class="text-xs text-gray-400 flex-grow">连接后可监控品牌相关的公开微博和评论区。</p>
+                    <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('连接成功')">连接</button>
+                </div>
+                 <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up opacity-60" style="animation-delay: 0.5s;">
+                    <img src="https://img.icons8.com/color/96/jira.png" class="w-16 h-16 mb-4" alt="Jira图标"/>
+                    <h3 class="text-xl font-bold">Jira</h3>
+                    <p class="text-sm text-gray-500 font-bold my-2">未连接</p>
+                    <p class="text-xs text-gray-400 flex-grow">连接后可实现对话中的任务与Jira工单联动。</p>
+                    <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('连接成功')">连接</button>
+                </div>
+                 <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up opacity-60" style="animation-delay: 0.6s;">
+                    <svg class="w-16 h-16 mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                    <h3 class="text-xl font-bold">开放平台API</h3>
+                    <p class="text-sm text-gray-500 font-bold my-2">可用</p>
+                    <p class="text-xs text-gray-400 flex-grow">通过SDK和API接入您自己的任意内部系统。</p>
+                    <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('已复制API文档链接')">查看文档</button>
+                </div>
             </div>
         </div>
 
-        <!-- View: "凤凰"项目群 -->
-        <div id="view-phoenix-project" class="view-container h-full flex-col gap-4 hidden">
-            <header class="panel p-4 flex-shrink-0 flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-white">"凤凰"项目群</h1>
-                <button class="btn-primary">生成项目周报</button>
+        <!-- View: Insight Engine -->
+        <div id="view-insight-engine" class="view-content hidden">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold font-orbitron">AI 洞察引擎配置</h2>
+                <p class="text-gray-400">配置系统的大脑。自定义分析模块，以满足不同业务场景的需求。</p>
             </header>
-            <div class="flex-grow h-0 grid grid-cols-3 grid-rows-2 gap-4">
-                <div class="panel p-4 col-span-2 row-span-1 flex flex-col"><h3 class="font-semibold text-white mb-2">任务燃尽图</h3><div id="burndown-chart" class="flex-grow"></div></div>
-                <div class="panel p-4 col-span-1 row-span-1 flex flex-col"><h3 class="font-semibold text-white mb-2">迭代进度</h3><div id="progress-chart" class="flex-grow"></div></div>
-                <div class="panel p-4 col-span-3 row-span-1 flex flex-col custom-scrollbar overflow-y-auto"><h3 class="font-semibold text-white mb-3">关键决策与风险</h3><div class="space-y-4"><div class="p-3 rounded-lg bg-gray-900/50 border border-gray-700 flex items-start gap-4"><div class="w-10 h-10 rounded-full bg-cyan-500 flex-shrink-0 flex items-center justify-center font-bold text-xl">✓</div><div><p class="text-sm text-white">【决策】确认采用新的API网关方案，以提升系统性能。</span></p><p class="text-xs text-gray-400 mt-1">来源: 项目核心群 | 昨天 15:30</p></div></div><div class="p-3 rounded-lg bg-gray-900/50 border border-gray-700 flex items-start gap-4"><div class="w-10 h-10 rounded-full bg-yellow-500 flex-shrink-0 flex items-center justify-center font-bold text-xl">!</div><div><p class="text-sm text-white">【风险】第三方支付接口联调受阻，可能影响上线日期。</span></p><p class="text-xs text-gray-400 mt-1">来源: 后端技术群 | 今天 09:12</p></div></div></div></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="glassmorphism rounded-xl p-6 fade-in-up">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-bold neon-text-primary">文本摘要</h3>
+                        <label class="switch"><input type="checkbox" checked onclick="showToast('文本摘要已启用')"><span class="slider"></span></label>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2 mb-4">从海量文本中提炼核心内容。支持不同角色和粒度的摘要。</p>
+                    <div class="space-y-3">
+                        <label class="block text-sm font-medium">摘要类型</label>
+                        <select class="w-full bg-gray-800 border border-gray-700 rounded-md p-2" onchange="showToast('设置已保存')">
+                            <option>通用摘要</option>
+                            <option>上下文感知摘要</option>
+                            <option>角色化摘要 (面向管理者)</option>
+                            <option>角色化摘要 (面向执行者)</option>
+                        </select>
+                        <label class="block text-sm font-medium">生成频率</label>
+                         <select class="w-full bg-gray-800 border border-gray-700 rounded-md p-2" onchange="showToast('设置已保存')">
+                            <option>每日日报</option>
+                            <option>每周周报</option>
+                            <option>实时生成</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.1s;">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-bold neon-text-primary">任务提取 (ToDo)</h3>
+                        <label class="switch"><input type="checkbox" checked onclick="showToast('任务提取已启用')"><span class="slider"></span></label>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2 mb-4">识别对话中的待办事项，并能分析任务依赖关系。</p>
+                    <div class="space-y-3">
+                        <label class="block text-sm font-medium">提取模式</label>
+                        <select class="w-full bg-gray-800 border border-gray-700 rounded-md p-2" onchange="showToast('设置已保存')">
+                            <option>智能提取与推荐负责人</option>
+                            <option>仅提取明确指定的任务</option>
+                        </select>
+                         <label class="block text-sm font-medium">任务链分析</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" class="accent-cyan-400" onchange="showToast('设置已保存')"> 自动分析任务依赖</label>
+                    </div>
+                </div>
+                <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-bold neon-text-primary">情感与意图分析</h3>
+                        <label class="switch"><input type="checkbox" checked onclick="showToast('情感分析已启用')"><span class="slider"></span></label>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2 mb-4">分析情绪倾向，并识别投诉、建议、商机等深层意图。</p>
+                    <div class="space-y-3">
+                        <label class="block text-sm font-medium">分析粒度</label>
+                        <select class="w-full bg-gray-800 border border-gray-700 rounded-md p-2" onchange="showToast('设置已保存')">
+                            <option>细粒度情感+意图识别</option>
+                            <option>通用情感 (积极/中性/消极)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.3s;">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-bold neon-text-primary">主题建模与演化</h3>
+                        <label class="switch"><input type="checkbox" checked onclick="showToast('主题建模已启用')"><span class="slider"></span></label>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2 mb-4">发现核心讨论主题，并能跨平台追踪话题演化路径。</p>
+                     <div class="space-y-3">
+                         <label class="block text-sm font-medium">话题追踪</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" class="accent-cyan-400" checked onchange="showToast('设置已保存')"> 开启跨平台话题演化分析</label>
+                    </div>
+                </div>
+                <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.4s;">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-bold neon-text-primary">知识图谱构建</h3>
+                        <label class="switch"><input type="checkbox" checked onclick="showToast('知识图谱已启用')"><span class="slider"></span></label>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2 mb-4">识别自定义实体，构建动态的“人-事-物”关系网络。</p>
+                    <div class="space-y-3">
+                        <label class="block text-sm font-medium">自定义实体类型</label>
+                        <input type="text" value="BUG编号, 项目代号, 竞品车型" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2" onchange="showToast('设置已保存')">
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- View: Q3市场活动监控 -->
-        <div id="view-q3-marketing" class="view-container h-full flex-col gap-4 hidden">
-            <header class="panel p-4 flex-shrink-0 flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-white">Q3市场活动监控</h1>
-                <button class="btn-primary">生成舆情报表</button>
+        <!-- View: Action Center -->
+        <div id="view-action-center" class="view-content hidden">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold font-orbitron">自动化行动中心</h2>
+                <p class="text-gray-400">打通“洞察”到“行动”的最后一公里。创建自动化工作流，让洞察自动转化为价值。</p>
             </header>
-            <div class="flex-grow h-0 grid grid-cols-2 gap-4">
-                <div class="panel p-4 col-span-1 flex flex-col"><h3 class="font-semibold text-white mb-2">情感趋势 (最近7天)</h3><div id="sentiment-trend-chart" class="flex-grow"></div></div>
-                <div class="panel p-4 col-span-1 flex flex-col"><h3 class="font-semibold text-white mb-2">跨平台话题演化</h3><div id="topic-evolution-chart" class="flex-grow"></div></div>
+             <div class="mb-6 text-right">
+                <button class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="showToast('模拟操作：打开工作流模板库')">
+                    + 创建新的工作流
+                </button>
+            </div>
+            <div class="space-y-6">
+                <!-- Workflow Rule 1 -->
+                <div class="glassmorphism rounded-xl p-6 fade-in-up neon-border">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold">舆情告警工作流</h3>
+                        <label class="switch"><input type="checkbox" checked onclick="showToast('工作流已激活')"><span class="slider"></span></label>
+                    </div>
+                    <div class="flex flex-col lg:flex-row items-center gap-4 text-center">
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-400 mb-1">触发器 (TRIGGER)</p>
+                            <div class="bg-gray-900 p-3 rounded-lg">
+                                <p class="font-mono">当 <span class="text-cyan-400">【汽车之家】</span>出现<span class="text-cyan-400">【“自燃”, “失控”】</span>关键词</p>
+                                <p class="font-mono text-lg font-bold text-gray-400">并且</p>
+                                <p class="font-mono">情感分析为 <span class="text-red-400">【强烈负面】</span></p>
+                            </div>
+                        </div>
+                        <svg class="w-8 h-8 text-cyan-400 transform lg:rotate-0 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-400 mb-1">动作 (ACTION)</p>
+                            <div class="bg-gray-900 p-3 rounded-lg">
+                                <p class="font-mono">在 <span class="text-cyan-400">【钉钉】</span>创建 <span class="text-yellow-400">【高优】</span>工单</p>
+                                <p class="font-mono text-lg font-bold text-gray-400">并且</p>
+                                <p class="font-mono">@ <span class="text-purple-400">【公关部负责人】</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Workflow Rule 2 -->
+                <div class="glassmorphism rounded-xl p-6 fade-in-up neon-border-secondary" style="animation-delay: 0.2s;">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold">项目进度跟进工作流</h3>
+                        <label class="switch"><input type="checkbox" checked onclick="showToast('工作流已激活')"><span class="slider"></span></label>
+                    </div>
+                    <div class="flex flex-col lg:flex-row items-center gap-4 text-center">
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-400 mb-1">触发器 (TRIGGER)</p>
+                            <div class="bg-gray-900 p-3 rounded-lg">
+                                <p class="font-mono">当 <span class="text-cyan-400">【钉钉项目群】</span>提取的 <span class="text-cyan-400">【ToDo】</span></p>
+                                <p class="font-mono text-lg font-bold text-gray-400">在</p>
+                                <p class="font-mono">截止日期前 <span class="text-red-400">【24小时】</span>仍未完成</p>
+                            </div>
+                        </div>
+                        <svg class="w-8 h-8 text-secondary-color transform lg:rotate-0 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-400 mb-1">动作 (ACTION)</p>
+                            <div class="bg-gray-900 p-3 rounded-lg">
+                                <p class="font-mono">在 <span class="text-cyan-400">【原群聊】</span>中自动发送提醒</p>
+                                <p class="font-mono text-lg font-bold text-gray-400">并且</p>
+                                <p class="font-mono">@ <span class="text-purple-400">【任务负责人】</span>和<span class="text-purple-400">【项目经理】</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <!-- View: 售后FAQ知识库 -->
-        <div id="view-faq-kb" class="view-container h-full flex-col gap-4 hidden">
-            <header class="panel p-4 flex-shrink-0 flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-white">售后FAQ知识库</h1>
-                <div class="relative">
-                    <input type="text" placeholder="搜索问题或答案..." class="bg-gray-900/50 border border-gray-700 rounded-lg py-2 px-4 w-72 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"><circle cx="11" cy="11" r="8"></circle><line x1="21" x2="16.65" y1="21" y2="16.65"></line></svg>
-                </div>
+        <!-- View: Knowledge Base -->
+        <div id="view-knowledge-base" class="view-content hidden">
+             <header class="mb-8">
+                <h2 class="text-3xl font-bold font-orbitron">动态知识库</h2>
+                <p class="text-gray-400">将非结构化的对话数据，转化为结构化、可复用的知识资产。</p>
             </header>
-            <div class="panel p-4 flex-grow custom-scrollbar overflow-y-auto">
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="text-lg font-semibold text-cyan-400 glow-text mb-2">AI生成的高频问题 Top 5</h3>
-                        <div class="space-y-2">
-                            <details class="p-3 rounded-lg bg-gray-900/50 cursor-pointer"><summary class="font-semibold">1. 新款车型的电池续航在冬季表现如何？</summary><p class="mt-2 text-sm text-gray-300 pt-2 border-t border-gray-700">根据近期用户反馈聚合分析，在-10℃环境下，续航里程约为标称的75%-80%。建议开启节能模式并使用预约充电功能预热电池。</p></details>
-                            <details class="p-3 rounded-lg bg-gray-900/50 cursor-pointer"><summary class="font-semibold">2. 车机系统如何升级到最新版本？</summary><p class="mt-2 text-sm text-gray-300 pt-2 border-t border-gray-700">系统支持OTA在线升级。请确保车辆网络连接正常，在“设置” > “系统信息” > “检查更新”中操作。升级过程约需20分钟。</p></details>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="glassmorphism rounded-xl p-6 fade-in-up">
+                        <h3 class="text-xl font-bold mb-4">高频问题 (FAQ) & 解决方案</h3>
+                        <div class="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                             <div class="p-4 bg-gray-900/50 rounded-lg">
+                                <p class="font-bold text-cyan-300">Q: NE-900升级后，哨兵模式耗电过快怎么办？</p>
+                                <p class="text-sm text-gray-300 mt-2">A: 这是已知问题，临时解决方案是关闭行车记录仪的碰撞检测灵敏度。研发已在排查，预计下个版本修复。 <span class="text-xs text-gray-500">(来源: 售后支持群)</span></p>
+                            </div>
+                            <div class="p-4 bg-gray-900/50 rounded-lg">
+                                <p class="font-bold text-cyan-300">Q: 如何在车机上安装第三方应用？</p>
+                                <p class="text-sm text-gray-300 mt-2">A: 目前系统暂不支持。但有用户在论坛分享了通过开发者模式安装的方法，存在风险，不建议普通用户尝试。 <span class="text-xs text-gray-500">(来源: 汽车之家论坛)</span></p>
+                            </div>
                         </div>
                     </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-purple-400 mb-2">最新发现的问题</h3>
-                         <div class="space-y-2">
-                            <div class="p-3 rounded-lg bg-gray-900/50"><p>部分用户反馈在连接特定型号手机时，蓝牙音乐播放有断续现象。 <span class="text-yellow-400 font-semibold">[待验证]</span></p></div>
+                     <div class="glassmorphism rounded-xl p-6 fade-in-up">
+                        <h3 class="text-xl font-bold mb-4">典型故障案例库</h3>
+                         <div class="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                            <div class="p-4 bg-gray-900/50 rounded-lg">
+                                <p class="font-bold text-yellow-300">案例#23041: 空调压缩机异响</p>
+                                <p class="text-sm text-gray-300 mt-2">现象: 在特定转速下，空调发出规律性高频噪音。诊断: 压缩机某批次支架存在设计缺陷。解决方案: 免费更换改进后的支架。 <span class="text-xs text-gray-500">(来源: 销服群)</span></p>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="glassmorphism rounded-xl p-6 fade-in-up">
+                        <h3 class="text-xl font-bold mb-4">智能问答 & 专家查找</h3>
+                        <input type="text" placeholder="输入您的问题..." class="w-full bg-gray-800 border border-gray-700 rounded-md p-3 mb-4">
+                        <button class="btn-primary w-full py-2 rounded-lg" onclick="showToast('正在知识库和专家网络中检索...')">智能检索</button>
+                    </div>
+                    <div class="glassmorphism rounded-xl p-6 fade-in-up">
+                        <h3 class="text-xl font-bold mb-4">专家网络</h3>
+                        <p class="text-sm text-gray-400 mb-4">根据历史贡献，系统自动识别出的领域专家。</p>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <img src="https://i.pravatar.cc/40?u=zhangwei" class="w-10 h-10 rounded-full" alt="张伟头像">
+                                <div>
+                                    <p class="font-bold">张伟</p>
+                                    <p class="text-xs text-cyan-400">领域: 渲染引擎, GPU优化</p>
+                                </div>
+                            </div>
+                             <div class="flex items-center gap-3">
+                                <img src="https://i.pravatar.cc/40?u=li-jing" class="w-10 h-10 rounded-full" alt="李静头像">
+                                <div>
+                                    <p class="font-bold">李静</p>
+                                    <p class="text-xs text-cyan-400">领域: 电池BMS, 热管理</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- View: Settings -->
+        <div id="view-settings" class="view-content hidden">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold font-orbitron">平台设置</h2>
+                <p class="text-gray-400">管理用户、角色、权限以及系统全局配置。</p>
+            </header>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glassmorphism rounded-xl p-6 fade-in-up">
+                    <h3 class="text-xl font-bold mb-4">用户与角色管理</h3>
+                    <button class="btn-secondary py-2 px-4 rounded-lg mb-4" onclick="showToast('模拟操作：打开邀请用户界面')">+ 邀请新成员</button>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center bg-gray-900/50 p-3 rounded">
+                            <span>admin@yourcompany.com (管理员)</span>
+                            <button class="text-xs text-red-400 hover:underline" onclick="showToast('操作成功')">移除</button>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-900/50 p-3 rounded">
+                            <span>zhang.wei@yourcompany.com (成员)</span>
+                            <button class="text-xs text-red-400 hover:underline" onclick="showToast('操作成功')">移除</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="glassmorphism rounded-xl p-6 fade-in-up">
+                    <h3 class="text-xl font-bold mb-4">多租户体系 (SaaS)</h3>
+                    <p class="text-gray-400 mb-4">当前为 <span class="font-bold text-cyan-400">企业内部版</span>。升级到SaaS商业版可开启多租户隔离、计费管理等高级功能。</p>
+                    <button class="btn-primary w-full py-2 rounded-lg" onclick="showToast('已联系商务顾问')">了解商业版</button>
                 </div>
             </div>
         </div>
 
     </main>
 
-    <!-- 右侧AI洞察与行动栏 -->
-    <aside class="w-96 h-full flex flex-col gap-4">
-        <div class="panel p-4 flex-grow flex flex-col">
-            <h2 class="text-xl font-bold text-white mb-4">AI 洞察与行动</h2>
-            <div class="flex-grow custom-scrollbar overflow-y-auto pr-2">
-                <h3 class="font-semibold text-cyan-400 glow-text mb-2">关键信息摘要 (最近24H)</h3>
-                <ul class="list-disc list-inside space-y-2 text-sm text-gray-300">
-                    <li>产品团队就<span class="font-semibold text-white">新版UI</span>达成共识，确定了蓝色为主色调。</li>
-                    <li>市场部确认<span class="font-semibold text-white">Q3推广预算</span>为50万，重点投放信息流广告。</li>
-                    <li>外部社区出现对<span class="font-semibold text-white">电池续航</span>的集中讨论，负面情绪占比上升15%。</li>
-                    <li>售后团队总结了<span class="font-semibold text-white">Top 3高频问题</span>，建议更新FAQ文档。</li>
-                </ul>
-
-                <div class="w-full h-[1px] bg-gray-700 my-6"></div>
-
-                <h3 class="font-semibold text-purple-400 mb-3">待办任务列表</h3>
-                <div class="space-y-3">
-                    <div class="p-3 rounded-lg bg-gray-900/50 flex items-center justify-between">
-                        <div>
-                            <p class="font-semibold text-white">完成API文档初稿</p>
-                            <p class="text-xs text-gray-400">负责人: 张伟 | 截止: 周五</p>
-                        </div>
-                        <button class="btn-secondary text-xs px-2 py-1">同步到钉钉</button>
-                    </div>
-                    <div class="p-3 rounded-lg bg-gray-900/50 flex items-center justify-between">
-                        <div>
-                            <p class="font-semibold text-white">分析电池续航舆情</p>
-                            <p class="text-xs text-gray-400">负责人: 李静 | 截止: 明天</p>
-                        </div>
-                        <button class="btn-secondary text-xs px-2 py-1">同步到钉钉</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="panel p-4 flex-shrink-0">
-            <h3 class="font-semibold text-white mb-2">数据源连接状态</h3>
-            <div class="space-y-2">
-                 <div class="flex items-center justify-between text-sm"><span class="flex items-center gap-2 font-semibold"><span class="w-2 h-2 rounded-full bg-blue-500"></span>钉钉</span><span class="text-green-400 font-semibold">连接正常</span></div>
-                 <div class="flex items-center justify-between text-sm"><span class="flex items-center gap-2 font-semibold"><span class="w-2 h-2 rounded-full bg-red-500"></span>贴吧</span><span class="text-green-400 font-semibold">连接正常</span></div>
-                 <div class="flex items-center justify-between text-sm"><span class="flex items-center gap-2 font-semibold"><span class="w-2 h-2 rounded-full bg-green-500"></span>知乎</span><span class="text-green-400 font-semibold">连接正常</span></div>
-                 <div class="flex items-center justify-between text-sm"><span class="flex items-center gap-2 font-semibold"><span class="w-2 h-2 rounded-full bg-orange-500"></span>汽车之家</span><span class="text-green-400 font-semibold">连接正常</span></div>
-            </div>
-        </div>
-    </aside>
-
-    <div id="toast" class="toast"></div>
-
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- 全局变量和函数 ---
-            const toast = document.getElementById('toast');
-            const navLinks = document.querySelectorAll('#main-nav .nav-link');
-            const views = document.querySelectorAll('.view-container');
-            const chartInstances = {};
+        // --- Core UI Logic ---
+        function switchView(viewId, element) {
+            // Hide all views
+            document.querySelectorAll('.view-content').forEach(view => {
+                view.classList.add('hidden');
+            });
+            // Show the selected view
+            document.getElementById('view-' + viewId).classList.remove('hidden');
 
-            function showToast(message) {
-                toast.textContent = message;
+            // Update active state in sidebar
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            element.classList.add('active');
+            
+            // Re-trigger animations for the new view
+            const viewContent = document.getElementById('view-' + viewId);
+            const animatedElements = viewContent.querySelectorAll('.fade-in-up');
+            animatedElements.forEach(el => {
+                el.style.animation = 'none';
+                el.offsetHeight; /* trigger reflow */
+                el.style.animation = null; 
+            });
+        }
+
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            // Trigger the show animation
+            setTimeout(() => {
                 toast.classList.add('show');
-                setTimeout(() => { toast.classList.remove('show'); }, 3000);
-            }
+            }, 100);
 
-            document.querySelectorAll('button').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const text = button.textContent.trim();
-                    if (text.startsWith('同步')) showToast('任务已成功同步到钉钉！');
-                    else if (text.startsWith('生成')) showToast('报告正在后台生成，请稍后查看！');
-                    else if (text.startsWith('新建')) showToast('操作成功！');
+            // Hide and remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.addEventListener('transitionend', () => {
+                    toast.remove();
                 });
-            });
+            }, 3000);
+        }
 
-            // --- 视图切换逻辑 ---
-            navLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const targetViewId = link.getAttribute('data-view');
-                    
-                    navLinks.forEach(l => l.classList.remove('active'));
-                    link.classList.add('active');
+        // --- Dashboard Chart Logic ---
+        const ctx = document.getElementById('sentimentChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(0, 242, 255, 0.5)');
+        gradient.addColorStop(1, 'rgba(0, 242, 255, 0)');
 
-                    views.forEach(view => {
-                        if (view.id === `view-${targetViewId}`) {
-                            view.classList.remove('hidden');
-                            view.classList.add('flex');
-                        } else {
-                            view.classList.add('hidden');
-                            view.classList.remove('flex');
+        const sentimentChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['7天前', '6天前', '5天前', '4天前', '3天前', '昨天', '今天'],
+                datasets: [{
+                    label: '信息量',
+                    data: [120, 190, 150, 250, 220, 300, 280],
+                    borderColor: '#00f2ff',
+                    backgroundColor: gradient,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#00f2ff',
+                    pointBorderColor: '#fff',
+                    pointHoverRadius: 7,
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#00f2ff'
+                }, {
+                    label: '负面情绪指数',
+                    data: [20, 30, 25, 40, 60, 55, 50],
+                    borderColor: '#ff00ff',
+                    tension: 0.4,
+                    fill: false,
+                    pointBackgroundColor: '#ff00ff',
+                    pointBorderColor: '#fff',
+                    pointHoverRadius: 7,
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#ff00ff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#e0e0e0',
+                            font: {
+                                family: "'Noto Sans SC', sans-serif"
+                            }
                         }
-                    });
-
-                    // 渲染目标视图的图表
-                    renderChartsForView(targetViewId);
-                });
-            });
-
-            // --- 图表定义 ---
-            const chartDefinitions = {
-                'global-overview': () => {
-                    if (!chartInstances['sentiment']) {
-                        const options = { series: [65, 25, 10], chart: { type: 'donut', height: '100%', background: 'transparent' }, labels: ['正面', '中性', '负面'], colors: ['#00f6ff', '#a8b2d3', '#ff5c5c'], dataLabels: { enabled: true, style: { fontSize: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 'bold' }, formatter: (val, opts) => opts.w.globals.labels[opts.seriesIndex] + ": " + val.toFixed(1) + "%" }, legend: { show: true, position: 'bottom', labels: { colors: ['#e0e7ff', '#e0e7ff', '#e0e7ff'] } }, plotOptions: { pie: { donut: { labels: { show: true, total: { show: true, label: '总信息', color: '#e0e7ff', formatter: w => w.globals.seriesTotals.reduce((a, b) => a + b, 0) } } } } }, tooltip: { theme: 'dark' }, stroke: { show: false } };
-                        chartInstances['sentiment'] = new ApexCharts(document.querySelector("#sentiment-chart"), options);
-                        chartInstances['sentiment'].render();
-                    }
-                    if (!chartInstances['wordcloud']) {
-                         const wordCloudContainer = document.getElementById('wordcloud-chart');
-                         const words = [{ text: '新功能', size: 9 }, { text: 'UI设计', size: 8 }, { text: '电池续航', size: 10 }, { text: '价格', size: 7 }, { text: '交付时间', size: 6 }, { text: 'BUG', size: 9 }, { text: '竞品', size: 5 }, { text: '市场活动', size: 7 }, { text: 'KOL', size: 6 }, { text: '售后服务', size: 8 }];
-                         setTimeout(() => { wordCloudContainer.innerHTML = ''; words.forEach(word => { const wordEl = document.createElement('span'); wordEl.textContent = word.text; wordEl.style.fontSize = `${word.size * 3 + 10}px`; wordEl.style.color = `hsl(${Math.random() * 360}, 90%, 70%)`; wordEl.style.padding = '0 5px'; wordEl.style.fontWeight = 'bold'; wordEl.style.display = 'inline-block'; wordCloudContainer.appendChild(wordEl); }); }, 500);
-                         chartInstances['wordcloud'] = true; // Mark as rendered
                     }
                 },
-                'phoenix-project': () => {
-                    if (!chartInstances['burndown']) {
-                        const options = { series: [{ name: '理想', data: [100, 88, 76, 64, 52, 40, 28, 16, 0] }, { name: '实际', data: [100, 92, 85, 78, 65, 58, 45, 30, 10] }], chart: { height: '100%', type: 'line', background: 'transparent', toolbar: { show: false }, zoom: { enabled: false } }, colors: ['#7a5fff', '#00f6ff'], theme: { mode: 'dark' }, dataLabels: { enabled: false }, stroke: { curve: 'smooth', width: 3 }, grid: { borderColor: 'rgba(255,255,255,0.1)', strokeDashArray: 5, }, xaxis: { categories: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9'], labels: { style: { colors: '#a8b2d3' } } }, yaxis: { labels: { style: { colors: '#a8b2d3' } } }, legend: { show: true, position: 'top', horizontalAlign: 'right', labels: { useSeriesColors: true } }, tooltip: { theme: 'dark' } };
-                        chartInstances['burndown'] = new ApexCharts(document.querySelector("#burndown-chart"), options);
-                        chartInstances['burndown'].render();
+                scales: {
+                    y: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#e0e0e0'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#e0e0e0'
+                        }
                     }
-                    if (!chartInstances['progress']) {
-                        const options = { series: [76, 67, 82], chart: { height: '100%', type: 'radialBar', background: 'transparent' }, plotOptions: { radialBar: { offsetY: 0, startAngle: 0, endAngle: 270, hollow: { margin: 5, size: '30%', background: 'transparent', image: undefined, }, dataLabels: { name: { show: false, }, value: { show: false, } } } }, colors: ['#00f6ff', '#7a5fff', '#28a745'], labels: ['功能点', '任务', 'Bugs修复'], legend: { show: true, floating: true, fontSize: '14px', position: 'left', offsetX: 30, offsetY: 15, labels: { useSeriesColors: true, }, markers: { size: 0 }, formatter: (seriesName, opts) => seriesName + ":  " + opts.w.globals.series[opts.seriesIndex] + '%', itemMargin: { vertical: 3 } } };
-                        chartInstances['progress'] = new ApexCharts(document.querySelector("#progress-chart"), options);
-                        chartInstances['progress'].render();
-                    }
-                },
-                'q3-marketing': () => {
-                    if (!chartInstances['sentiment-trend']) {
-                        const options = { series: [{ name: '正面', data: [31, 40, 28, 51, 42, 109, 100] }, { name: '负面', data: [11, 32, 45, 32, 34, 52, 41] }], chart: { height: '100%', type: 'area', background: 'transparent', toolbar: { show: false }, zoom: { enabled: false } }, colors: ['#00f6ff', '#ff5c5c'], theme: { mode: 'dark' }, dataLabels: { enabled: false }, stroke: { curve: 'smooth', width: 3 }, grid: { borderColor: 'rgba(255,255,255,0.1)', strokeDashArray: 5, }, xaxis: { type: 'datetime', categories: ["2024-07-25", "2024-07-26", "2024-07-27", "2024-07-28", "2024-07-29", "2024-07-30", "2024-07-31"], labels: { style: { colors: '#a8b2d3' } } }, yaxis: { labels: { style: { colors: '#a8b2d3' } } }, legend: { show: true, position: 'top', horizontalAlign: 'right', labels: { useSeriesColors: true } }, tooltip: { theme: 'dark', x: { format: 'dd MMM yyyy' } } };
-                        chartInstances['sentiment-trend'] = new ApexCharts(document.querySelector("#sentiment-trend-chart"), options);
-                        chartInstances['sentiment-trend'].render();
-                    }
-                     if (!chartInstances['topic-evolution']) {
-                        const options = { series: [ { name: '钉钉', data: [[10, 8, 30, '价格'], [20, 12, 40, '续航']] }, { name: '贴吧', data: [[35, 15, 60, '续航'], [45, 10, 35, '车机']] }, { name: '知乎', data: [[60, 8, 50, '技术'], [70, 18, 25, '竞品']] } ], chart: { height: '100%', type: 'bubble', background: 'transparent', toolbar: { show: false }, zoom: { enabled: false } }, colors: ['#007bff', '#dc3545', '#00f6ff'], theme: { mode: 'dark' }, dataLabels: { enabled: false }, fill: { opacity: 0.7 }, grid: { borderColor: 'rgba(255,255,255,0.1)', strokeDashArray: 5, }, xaxis: { tickAmount: 10, labels: { show: false } }, yaxis: { max: 20, labels: { show: false } }, tooltip: { theme: 'dark', y: { formatter: (val, { series, seriesIndex, dataPointIndex, w }) => w.config.series[seriesIndex].data[dataPointIndex][3] + ' (热度: ' + val + ')' } } };
-                        chartInstances['topic-evolution'] = new ApexCharts(document.querySelector("#topic-evolution-chart"), options);
-                        chartInstances['topic-evolution'].render();
-                    }
-                },
-                'faq-kb': () => {
-                    // No charts to render for this view
-                }
-            };
-
-            function renderChartsForView(viewId) {
-                if (chartDefinitions[viewId]) {
-                    chartDefinitions[viewId]();
                 }
             }
+        });
 
-            // --- 初始加载 ---
-            renderChartsForView('global-overview');
+        // --- Word Cloud Logic ---
+        const words = [
+            {text: '电池续航', size: 90}, {text: 'OTA升级', size: 80},
+            {text: '智能驾驶', size: 75}, {text: '车机卡顿', size: 70, color: '#ff00ff'},
+            {text: '交付', size: 60}, {text: '供应链', size: 55, color: '#ffc107'},
+            {text: 'checklist', size: 50}, {text: '渲染引擎', size: 48},
+            {text: '固态电池', size: 45}, {text: '用户建议', size: 42},
+            {text: 'KOL', size: 40}, {text: '售后', size: 38},
+            {text: '价格', size: 35}, {text: '内饰', size: 32},
+        ];
+
+        const layout = d3.layout.cloud()
+            .size([document.getElementById('wordCloud').clientWidth, 256])
+            .words(words)
+            .padding(5)
+            .rotate(() => (~~(Math.random() * 6) - 3) * 15)
+            .font('Noto Sans SC')
+            .fontSize(d => d.size / 2) // scale down size for display
+            .on("end", draw);
+
+        layout.start();
+
+        function draw(words) {
+            d3.select("#wordCloud").append("svg")
+                .attr("width", layout.size()[0])
+                .attr("height", layout.size()[1])
+                .append("g")
+                .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
+                .selectAll("text")
+                .data(words)
+                .enter().append("text")
+                .style("font-size", d => d.size + "px")
+                .style("font-family", "Noto Sans SC")
+                .style("fill", d => d.color || '#00f2ff')
+                .attr("text-anchor", "middle")
+                .attr("transform", d => "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")")
+                .text(d => d.text)
+                .style("opacity", 0)
+                .transition()
+                .duration(1000)
+                .style("opacity", 1);
+        }
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set initial view based on hash or default to dashboard
+            const initialView = window.location.hash.substring(1) || 'dashboard';
+            const initialLink = document.querySelector(`.sidebar-item[href="#${initialView}"]`);
+            if(initialLink) {
+                switchView(initialView, initialLink);
+            }
         });
     </script>
 </body>
