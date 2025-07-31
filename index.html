@@ -135,7 +135,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            z-index: 9999;
+            z-index: 10000;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -196,6 +196,34 @@
         }
         input:checked + .slider:before {
             transform: translateX(26px);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
         }
     </style>
 </head>
@@ -335,35 +363,35 @@
                 <p class="text-gray-400">可插拔式设计，轻松连接、配置和管理您的信息来源。</p>
             </header>
             <div class="mb-6 text-right">
-                <button class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="showToast('模拟操作：打开连接器市场')">
+                <button class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="openModal()">
                     + 添加新的数据源
                 </button>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div id="data-source-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 <!-- Data Source Cards -->
                 <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up">
-                    <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-07-31/badc2b31-e6b5-4026-b117-5597bbd0c20b.jpeg" class="w-16 h-16 mb-4" alt="钉钉图标"/>
+                    <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-07-31/badc2b31-e6b5-4026-b117-5597bbd0c20b.jpeg" class="w-16 h-16 mb-4 object-contain" alt="钉钉图标"/>
                     <h3 class="text-xl font-bold">钉钉</h3>
                     <p class="text-sm text-green-400 font-bold my-2">已连接 (5个群聊)</p>
                     <p class="text-xs text-gray-400 flex-grow">实时同步内部项目群、售后支持群的对话。</p>
                     <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
                 </div>
                 <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up" style="animation-delay: 0.1s;">
-                    <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-07-31/ca51d189-3c4d-44f8-9a34-848f4cd3c54b.jpeg" class="w-16 h-16 mb-4" alt="企业微信图标"/>
+                    <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-07-31/ca51d189-3c4d-44f8-9a34-848f4cd3c54b.jpeg" class="w-16 h-16 mb-4 object-contain" alt="企业微信图标"/>
                     <h3 class="text-xl font-bold">企业微信</h3>
                     <p class="text-sm text-green-400 font-bold my-2">已连接 (2个群聊)</p>
                     <p class="text-xs text-gray-400 flex-grow">同步销服团队与客户的沟通记录。</p>
                     <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
                 </div>
                 <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up" style="animation-delay: 0.2s;">
-                    <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-07-31/e1586104-dc89-4b4d-bfd0-7d1dd583e7ba.png" class="w-16 h-16 mb-4 rounded-full" alt="知乎图标"/>
+                    <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-07-31/e1586104-dc89-4b4d-bfd0-7d1dd583e7ba.png" class="w-16 h-16 mb-4 object-contain" alt="知乎图标"/>
                     <h3 class="text-xl font-bold">知乎</h3>
                     <p class="text-sm text-green-400 font-bold my-2">已连接</p>
                     <p class="text-xs text-gray-400 flex-grow">监控与品牌、技术相关的热门问题和回答。</p>
                     <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
                 </div>
                 <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up" style="animation-delay: 0.3s;">
-                    <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-07-31/7fcc3f94-79df-4d18-be62-03af48451022.png" class="w-16 h-16 mb-4 rounded-full" alt="汽车之家图标"/>
+                    <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-07-31/7fcc3f94-79df-4d18-be62-03af48451022.png" class="w-16 h-16 mb-4 object-contain" alt="汽车之家图标"/>
                     <h3 class="text-xl font-bold">汽车之家</h3>
                     <p class="text-sm text-yellow-400 font-bold my-2">连接中...</p>
                     <p class="text-xs text-gray-400 flex-grow">实时追踪核心车型论坛的长帖和用户反馈。</p>
@@ -636,23 +664,55 @@
 
     </main>
 
+    <!-- Add Data Source Modal -->
+    <div id="addDataSourceModal" class="modal-overlay">
+        <div class="modal-content glassmorphism rounded-xl w-full max-w-lg m-4">
+            <div class="p-6 border-b border-gray-800 flex justify-between items-center">
+                <h3 class="text-2xl font-bold font-orbitron">添加新的数据源</h3>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-white">&times;</button>
+            </div>
+            <div class="p-6">
+                <form id="addDataSourceForm" class="space-y-4">
+                    <div>
+                        <label for="sourceName" class="block text-sm font-medium text-gray-300 mb-1">数据源名称</label>
+                        <input type="text" id="sourceName" name="sourceName" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400" placeholder="例如: 市场部舆情监控" required>
+                    </div>
+                    <div>
+                        <label for="sourceType" class="block text-sm font-medium text-gray-300 mb-1">数据源类型</label>
+                        <select id="sourceType" name="sourceType" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400">
+                            <option value="Webhook">通用 Webhook</option>
+                            <option value="Feishu">飞书</option>
+                            <option value="Slack">Slack</option>
+                            <option value="Custom API">自定义 API</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="sourceDesc" class="block text-sm font-medium text-gray-300 mb-1">简要描述</label>
+                        <textarea id="sourceDesc" name="sourceDesc" rows="3" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400" placeholder="例如: 用于监控飞书上的客户反馈群"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="p-6 bg-gray-900/30 rounded-b-xl flex justify-end gap-4">
+                <button type="button" class="btn-secondary py-2 px-5 rounded-lg" onclick="closeModal()">取消</button>
+                <button type="button" class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="addDataSource()">确认添加</button>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         // --- Core UI Logic ---
         function switchView(viewId, element) {
-            // Hide all views
             document.querySelectorAll('.view-content').forEach(view => {
                 view.classList.add('hidden');
             });
-            // Show the selected view
             document.getElementById('view-' + viewId).classList.remove('hidden');
 
-            // Update active state in sidebar
             document.querySelectorAll('.sidebar-item').forEach(item => {
                 item.classList.remove('active');
             });
             element.classList.add('active');
             
-            // Re-trigger animations for the new view
             const viewContent = document.getElementById('view-' + viewId);
             const animatedElements = viewContent.querySelectorAll('.fade-in-up');
             animatedElements.forEach(el => {
@@ -669,19 +729,71 @@
             toast.textContent = message;
             container.appendChild(toast);
 
-            // Trigger the show animation
             setTimeout(() => {
                 toast.classList.add('show');
             }, 100);
 
-            // Hide and remove after 3 seconds
             setTimeout(() => {
                 toast.classList.remove('show');
                 toast.addEventListener('transitionend', () => {
-                    toast.remove();
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
                 });
             }, 3000);
         }
+
+        // --- Modal Logic ---
+        const modal = document.getElementById('addDataSourceModal');
+        function openModal() {
+            modal.classList.add('active');
+        }
+        function closeModal() {
+            modal.classList.remove('active');
+            document.getElementById('addDataSourceForm').reset();
+        }
+        // Close modal on overlay click
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        // --- Add Data Source Logic ---
+        function addDataSource() {
+            const form = document.getElementById('addDataSourceForm');
+            const sourceName = form.sourceName.value;
+            const sourceType = form.sourceType.value;
+            const sourceDesc = form.sourceDesc.value;
+
+            if (!sourceName) {
+                showToast('错误：数据源名称不能为空');
+                return;
+            }
+
+            const grid = document.getElementById('data-source-grid');
+            
+            // Create a new card element
+            const newCard = document.createElement('div');
+            newCard.className = 'glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up';
+            
+            // Generic icon for new sources
+            const iconSvg = `<svg class="w-16 h-16 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>`;
+
+            newCard.innerHTML = `
+                ${iconSvg}
+                <h3 class="text-xl font-bold">${sourceName}</h3>
+                <p class="text-sm text-cyan-400 font-bold my-2">${sourceType}</p>
+                <p class="text-xs text-gray-400 flex-grow">${sourceDesc || '暂无描述'}</p>
+                <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
+            `;
+            
+            grid.appendChild(newCard);
+            
+            closeModal();
+            showToast(`数据源 "${sourceName}" 添加成功！`);
+        }
+
 
         // --- Dashboard Chart Logic ---
         const ctx = document.getElementById('sentimentChart').getContext('2d');
@@ -763,19 +875,29 @@
             {text: '价格', size: 35}, {text: '内饰', size: 32},
         ];
 
-        const layout = d3.layout.cloud()
-            .size([document.getElementById('wordCloud').clientWidth, 256])
-            .words(words)
-            .padding(5)
-            .rotate(() => (~~(Math.random() * 6) - 3) * 15)
-            .font('Noto Sans SC')
-            .fontSize(d => d.size / 2) // scale down size for display
-            .on("end", draw);
+        let wordCloudRendered = false;
+        function renderWordCloud() {
+            if (wordCloudRendered) return;
+            const container = document.getElementById('wordCloud');
+            if (!container || container.clientWidth === 0) return;
 
-        layout.start();
+            const layout = d3.layout.cloud()
+                .size([container.clientWidth, 256])
+                .words(words)
+                .padding(5)
+                .rotate(() => (~~(Math.random() * 6) - 3) * 15)
+                .font('Noto Sans SC')
+                .fontSize(d => d.size / 2) // scale down size for display
+                .on("end", draw);
+
+            layout.start();
+            wordCloudRendered = true;
+        }
 
         function draw(words) {
-            d3.select("#wordCloud").append("svg")
+            const container = d3.select("#wordCloud");
+            container.selectAll("*").remove(); // Clear previous render
+            container.append("svg")
                 .attr("width", layout.size()[0])
                 .attr("height", layout.size()[1])
                 .append("g")
@@ -797,12 +919,13 @@
 
         // Initial setup
         document.addEventListener('DOMContentLoaded', () => {
-            // Set initial view based on hash or default to dashboard
             const initialView = window.location.hash.substring(1) || 'dashboard';
             const initialLink = document.querySelector(`.sidebar-item[href="#${initialView}"]`);
             if(initialLink) {
                 switchView(initialView, initialLink);
             }
+            renderWordCloud();
+            new ResizeObserver(renderWordCloud).observe(document.getElementById('wordCloud'));
         });
     </script>
 </body>
