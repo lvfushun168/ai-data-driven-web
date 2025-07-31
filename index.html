@@ -225,6 +225,78 @@
         .modal-overlay.active .modal-content {
             transform: scale(1);
         }
+
+        /* Workflow Editor Styles */
+        .workflow-editor-modal {
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(15px);
+        }
+        .workflow-node {
+            cursor: grab;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+        .workflow-node:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 8px var(--glow-color-primary);
+        }
+        #workflow-canvas {
+            background-image:
+                linear-gradient(rgba(0, 242, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .canvas-node {
+            position: absolute;
+            cursor: move;
+            border: 2px solid transparent;
+        }
+        .canvas-node.selected {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px var(--glow-color-primary);
+        }
+        .node-connector {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: #fff;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            cursor: crosshair;
+            transform: translate(-50%, -50%);
+        }
+        .node-connector.output {
+            right: -6px;
+            top: 50%;
+        }
+        .node-connector.input {
+            left: -6px;
+            top: 50%;
+        }
+        #workflow-svg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        #workflow-svg-layer path {
+            stroke: var(--primary-color);
+            stroke-width: 3;
+            fill: none;
+            animation: dash 2s linear infinite;
+        }
+        @keyframes dash {
+            from {
+                stroke-dashoffset: 100;
+            }
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
     </style>
 </head>
 <body class="flex min-h-screen">
@@ -363,7 +435,7 @@
                 <p class="text-gray-400">可插拔式设计，轻松连接、配置和管理您的信息来源。</p>
             </header>
             <div class="mb-6 text-right">
-                <button class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="openModal()">
+                <button class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="openModal('addDataSourceModal')">
                     + 添加新的数据源
                 </button>
             </div>
@@ -512,11 +584,11 @@
                 <p class="text-gray-400">打通“洞察”到“行动”的最后一公里。创建自动化工作流，让洞察自动转化为价值。</p>
             </header>
              <div class="mb-6 text-right">
-                <button class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="showToast('模拟操作：打开工作流模板库')">
+                <button class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="openModal('workflowEditorModal')">
                     + 创建新的工作流
                 </button>
             </div>
-            <div class="space-y-6">
+            <div id="workflow-list" class="space-y-6">
                 <!-- Workflow Rule 1 -->
                 <div class="glassmorphism rounded-xl p-6 fade-in-up neon-border">
                     <div class="flex justify-between items-center mb-4">
@@ -669,7 +741,7 @@
         <div class="modal-content glassmorphism rounded-xl w-full max-w-lg m-4">
             <div class="p-6 border-b border-gray-800 flex justify-between items-center">
                 <h3 class="text-2xl font-bold font-orbitron">添加新的数据源</h3>
-                <button onclick="closeModal()" class="text-gray-500 hover:text-white">&times;</button>
+                <button onclick="closeModal('addDataSourceModal')" class="text-gray-500 hover:text-white text-3xl leading-none">&times;</button>
             </div>
             <div class="p-6">
                 <form id="addDataSourceForm" class="space-y-4">
@@ -693,8 +765,78 @@
                 </form>
             </div>
             <div class="p-6 bg-gray-900/30 rounded-b-xl flex justify-end gap-4">
-                <button type="button" class="btn-secondary py-2 px-5 rounded-lg" onclick="closeModal()">取消</button>
+                <button type="button" class="btn-secondary py-2 px-5 rounded-lg" onclick="closeModal('addDataSourceModal')">取消</button>
                 <button type="button" class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="addDataSource()">确认添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow Editor Modal -->
+    <div id="workflowEditorModal" class="modal-overlay workflow-editor-modal">
+        <div class="modal-content glassmorphism rounded-xl w-full max-w-7xl h-[90vh] m-4 flex flex-col">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0">
+                <div>
+                    <h3 class="text-2xl font-bold font-orbitron">可视化工作流编辑器</h3>
+                    <input id="workflowName" type="text" class="bg-transparent text-lg text-gray-300 border-b border-gray-600 focus:border-cyan-400 outline-none" value="新的工作流">
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="btn-secondary py-2 px-5 rounded-lg" onclick="closeModal('workflowEditorModal')">取消</button>
+                    <button class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="saveWorkflow()">保存并激活</button>
+                </div>
+            </div>
+            <div class="flex-grow flex min-h-0">
+                <!-- Node Palette -->
+                <aside class="w-64 bg-gray-900/50 p-4 shrink-0 overflow-y-auto">
+                    <h4 class="font-bold text-lg mb-4 neon-text-primary">节点库</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <h5 class="font-bold text-cyan-300 mb-2">触发器 (Triggers)</h5>
+                            <div class="space-y-2">
+                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'trigger-keyword')">
+                                    <p class="font-bold">关键词检测</p>
+                                    <p class="text-xs text-gray-400">当消息包含特定词汇时</p>
+                                </div>
+                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'trigger-sentiment')">
+                                    <p class="font-bold">情感分析</p>
+                                    <p class="text-xs text-gray-400">当消息情感为特定类型时</p>
+                                </div>
+                                 <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'trigger-schedule')">
+                                    <p class="font-bold">定时触发</p>
+                                    <p class="text-xs text-gray-400">在指定时间自动运行</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-purple-300 mb-2">动作 (Actions)</h5>
+                            <div class="space-y-2">
+                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'action-notify')">
+                                    <p class="font-bold">发送钉钉通知</p>
+                                    <p class="text-xs text-gray-400">在指定群聊或@某人</p>
+                                </div>
+                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'action-todo')">
+                                    <p class="font-bold">创建待办事项</p>
+                                    <p class="text-xs text-gray-400">在任务中心创建ToDo</p>
+                                </div>
+                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'action-webhook')">
+                                    <p class="font-bold">调用 Webhook</p>
+                                    <p class="text-xs text-gray-400">向指定URL发送POST请求</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+                <!-- Canvas -->
+                <main id="workflow-canvas" class="flex-grow relative" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" onclick="deselectAllNodes(event)">
+                    <svg id="workflow-svg-layer"></svg>
+                    <!-- Nodes will be added here dynamically -->
+                </main>
+                <!-- Properties Panel -->
+                <aside id="properties-panel" class="w-72 bg-gray-900/50 p-4 shrink-0 overflow-y-auto hidden">
+                    <h4 class="font-bold text-lg mb-4 neon-text-secondary">节点配置</h4>
+                    <div id="properties-content">
+                        <!-- Properties form will be injected here -->
+                    </div>
+                </aside>
             </div>
         </div>
     </div>
@@ -744,19 +886,23 @@
         }
 
         // --- Modal Logic ---
-        const modal = document.getElementById('addDataSourceModal');
-        function openModal() {
-            modal.classList.add('active');
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if(modal) modal.classList.add('active');
         }
-        function closeModal() {
-            modal.classList.remove('active');
-            document.getElementById('addDataSourceForm').reset();
-        }
-        // Close modal on overlay click
-        modal.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                closeModal();
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if(modal) modal.classList.remove('active');
+            if(modalId === 'addDataSourceModal') {
+                document.getElementById('addDataSourceForm').reset();
             }
+        }
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
         });
 
         // --- Add Data Source Logic ---
@@ -772,12 +918,8 @@
             }
 
             const grid = document.getElementById('data-source-grid');
-            
-            // Create a new card element
             const newCard = document.createElement('div');
             newCard.className = 'glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up';
-            
-            // Generic icon for new sources
             const iconSvg = `<svg class="w-16 h-16 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>`;
 
             newCard.innerHTML = `
@@ -789,11 +931,277 @@
             `;
             
             grid.appendChild(newCard);
-            
-            closeModal();
+            closeModal('addDataSourceModal');
             showToast(`数据源 "${sourceName}" 添加成功！`);
         }
 
+        // --- Workflow Editor Logic ---
+        const canvas = document.getElementById('workflow-canvas');
+        const svgLayer = document.getElementById('workflow-svg-layer');
+        const propertiesPanel = document.getElementById('properties-panel');
+        const propertiesContent = document.getElementById('properties-content');
+
+        let nodes = [];
+        let connections = [];
+        let nodeIdCounter = 0;
+        let selectedNode = null;
+        let isDraggingNode = false;
+        let dragOffsetX, dragOffsetY;
+        let tempLine = null;
+        let startConnector = null;
+
+        function handleDragStart(event, nodeType) {
+            event.dataTransfer.setData('node-type', nodeType);
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            const nodeType = event.dataTransfer.getData('node-type');
+            if (nodeType) {
+                const rect = canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                createNode(nodeType, x, y);
+            }
+        }
+
+        function createNode(type, x, y) {
+            const nodeId = `node-${nodeIdCounter++}`;
+            const nodeData = { id: nodeId, type, x, y, properties: {} };
+            
+            const nodeElement = document.createElement('div');
+            nodeElement.id = nodeId;
+            nodeElement.className = 'canvas-node glassmorphism p-3 rounded-lg w-52';
+            nodeElement.style.left = `${x}px`;
+            nodeElement.style.top = `${y}px`;
+            
+            let title, description, icon, colorClass;
+            if (type.startsWith('trigger')) {
+                colorClass = 'border-cyan-400';
+                if (type === 'trigger-keyword') { title = '关键词检测'; description = '未配置'; nodeData.properties = { keywords: '' }; }
+                if (type === 'trigger-sentiment') { title = '情感分析'; description = '未配置'; nodeData.properties = { sentiment: 'positive' }; }
+                if (type === 'trigger-schedule') { title = '定时触发'; description = '未配置'; nodeData.properties = { cron: '0 0 * * *' }; }
+            } else {
+                colorClass = 'border-purple-400';
+                if (type === 'action-notify') { title = '发送钉钉通知'; description = '未配置'; nodeData.properties = { channel: '', message: '' }; }
+                if (type === 'action-todo') { title = '创建待办事项'; description = '未配置'; nodeData.properties = { title: '', assignee: '' }; }
+                if (type === 'action-webhook') { title = '调用 Webhook'; description = '未配置'; nodeData.properties = { url: '' }; }
+            }
+            
+            nodeElement.innerHTML = `
+                <p class="font-bold text-sm ${type.startsWith('trigger') ? 'text-cyan-300' : 'text-purple-300'}">${title}</p>
+                <p id="desc-${nodeId}" class="text-xs text-gray-400">${description}</p>
+                <div class="node-connector output" data-node-id="${nodeId}" data-connector-type="output"></div>
+                <div class="node-connector input" data-node-id="${nodeId}" data-connector-type="input"></div>
+            `;
+            nodeElement.classList.add(colorClass, 'border-l-4');
+
+            nodeElement.addEventListener('mousedown', startDragNode);
+            nodeElement.addEventListener('click', (e) => { e.stopPropagation(); selectNode(nodeData); });
+            canvas.appendChild(nodeElement);
+            nodes.push(nodeData);
+        }
+
+        function selectNode(nodeData) {
+            deselectAllNodes();
+            selectedNode = nodeData;
+            document.getElementById(nodeData.id).classList.add('selected');
+            propertiesPanel.classList.remove('hidden');
+            renderProperties(nodeData);
+        }
+        
+        function deselectAllNodes(event) {
+            if (event && event.target !== canvas) return;
+            if (selectedNode) {
+                document.getElementById(selectedNode.id)?.classList.remove('selected');
+            }
+            selectedNode = null;
+            propertiesPanel.classList.add('hidden');
+        }
+
+        function startDragNode(e) {
+            if (e.target.classList.contains('node-connector')) return;
+            e.preventDefault();
+            const nodeElement = e.currentTarget;
+            isDraggingNode = true;
+            selectNode(nodes.find(n => n.id === nodeElement.id));
+            dragOffsetX = e.clientX - nodeElement.offsetLeft;
+            dragOffsetY = e.clientY - nodeElement.offsetTop;
+            
+            document.onmousemove = (moveEvent) => {
+                if (!isDraggingNode) return;
+                const rect = canvas.getBoundingClientRect();
+                let x = moveEvent.clientX - dragOffsetX;
+                let y = moveEvent.clientY - dragOffsetY;
+                
+                x = Math.max(0, Math.min(x, canvas.clientWidth - nodeElement.offsetWidth));
+                y = Math.max(0, Math.min(y, canvas.clientHeight - nodeElement.offsetHeight));
+
+                nodeElement.style.left = `${x}px`;
+                nodeElement.style.top = `${y}px`;
+                selectedNode.x = x;
+                selectedNode.y = y;
+                updateConnections();
+            };
+            
+            document.onmouseup = () => {
+                isDraggingNode = false;
+                document.onmousemove = null;
+                document.onmouseup = null;
+            };
+        }
+
+        function renderProperties(nodeData) {
+            let formHtml = `<p class="mb-4 text-sm">正在配置: <span class="font-bold">${nodeData.id}</span></p>`;
+            for (const key in nodeData.properties) {
+                formHtml += `
+                    <div class="mb-3">
+                        <label class="block text-xs font-medium text-gray-400 mb-1">${key}</label>
+                        <input type="text" data-property="${key}" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-sm" value="${nodeData.properties[key]}">
+                    </div>
+                `;
+            }
+            propertiesContent.innerHTML = formHtml;
+            propertiesContent.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    nodeData.properties[e.target.dataset.property] = e.target.value;
+                    updateNodeDescription(nodeData);
+                });
+            });
+        }
+        
+        function updateNodeDescription(nodeData) {
+            const descElement = document.getElementById(`desc-${nodeData.id}`);
+            let descText = '已配置';
+            if (nodeData.type === 'trigger-keyword') descText = `关键词: ${nodeData.properties.keywords.substring(0,10) || '...'}`;
+            if (nodeData.type === 'action-notify') descText = `通知: ${nodeData.properties.channel.substring(0,10) || '...'}`;
+            descElement.textContent = descText;
+        }
+
+        // Connection Logic
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('node-connector')) {
+                startConnector = e.target;
+                e.stopPropagation();
+                
+                tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                tempLine.setAttribute('stroke-dasharray', '5,5');
+                svgLayer.appendChild(tempLine);
+
+                document.addEventListener('mousemove', drawTempLine);
+                document.addEventListener('mouseup', endConnection);
+            }
+        });
+
+        function drawTempLine(e) {
+            if (!startConnector) return;
+            const startRect = startConnector.getBoundingClientRect();
+            const canvasRect = canvas.getBoundingClientRect();
+            const startX = startRect.left + startRect.width / 2 - canvasRect.left;
+            const startY = startRect.top + startRect.height / 2 - canvasRect.top;
+            const endX = e.clientX - canvasRect.left;
+            const endY = e.clientY - canvasRect.top;
+            const d = `M ${startX} ${startY} C ${startX + 50} ${startY}, ${endX - 50} ${endY}, ${endX} ${endY}`;
+            tempLine.setAttribute('d', d);
+        }
+
+        function endConnection(e) {
+            if (tempLine) {
+                tempLine.remove();
+                tempLine = null;
+            }
+            if (e.target.classList.contains('node-connector') && e.target !== startConnector) {
+                const endConnector = e.target;
+                const startNodeId = startConnector.dataset.nodeId;
+                const endNodeId = endConnector.dataset.nodeId;
+                const startType = startConnector.dataset.connectorType;
+                const endType = endConnector.dataset.connectorType;
+
+                if (startNodeId !== endNodeId && startType !== endType) {
+                    const fromNode = startType === 'output' ? startNodeId : endNodeId;
+                    const toNode = startType === 'output' ? endNodeId : startNodeId;
+                    connections.push({ from: fromNode, to: toNode });
+                    updateConnections();
+                }
+            }
+            startConnector = null;
+            document.removeEventListener('mousemove', drawTempLine);
+            document.removeEventListener('mouseup', endConnection);
+        }
+
+        function updateConnections() {
+            svgLayer.innerHTML = '';
+            connections.forEach(conn => {
+                const fromNodeEl = document.getElementById(conn.from);
+                const toNodeEl = document.getElementById(conn.to);
+                if (!fromNodeEl || !toNodeEl) return;
+
+                const startX = fromNodeEl.offsetLeft + fromNodeEl.offsetWidth;
+                const startY = fromNodeEl.offsetTop + fromNodeEl.offsetHeight / 2;
+                const endX = toNodeEl.offsetLeft;
+                const endY = toNodeEl.offsetTop + toNodeEl.offsetHeight / 2;
+                
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const d = `M ${startX} ${startY} C ${startX + 70} ${startY}, ${endX - 70} ${endY}, ${endX} ${endY}`;
+                path.setAttribute('d', d);
+                path.setAttribute('stroke-dasharray', '1000');
+                svgLayer.appendChild(path);
+            });
+        }
+        
+        function saveWorkflow() {
+            const workflowName = document.getElementById('workflowName').value || '未命名工作流';
+            const triggerNode = nodes.find(n => n.type.startsWith('trigger'));
+            const actionNode = nodes.find(n => n.type.startsWith('action'));
+
+            if (!triggerNode || !actionNode || connections.length === 0) {
+                showToast('错误: 工作流不完整，请至少连接一个触发器和一个动作');
+                return;
+            }
+            
+            // For simplicity, we'll just use the first trigger and action found
+            const triggerDesc = document.getElementById(`desc-${triggerNode.id}`).textContent;
+            const actionDesc = document.getElementById(`desc-${actionNode.id}`).textContent;
+
+            const workflowList = document.getElementById('workflow-list');
+            const newWorkflowCard = document.createElement('div');
+            newWorkflowCard.className = 'glassmorphism rounded-xl p-6 fade-in-up neon-border';
+            newWorkflowCard.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">${workflowName}</h3>
+                    <label class="switch"><input type="checkbox" checked onclick="showToast('工作流已激活')"><span class="slider"></span></label>
+                </div>
+                <div class="flex flex-col lg:flex-row items-center gap-4 text-center">
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-400 mb-1">触发器 (TRIGGER)</p>
+                        <div class="bg-gray-900 p-3 rounded-lg">
+                            <p class="font-mono"><span class="text-cyan-400">${triggerDesc}</span></p>
+                        </div>
+                    </div>
+                    <svg class="w-8 h-8 text-cyan-400 transform lg:rotate-0 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-400 mb-1">动作 (ACTION)</p>
+                        <div class="bg-gray-900 p-3 rounded-lg">
+                            <p class="font-mono"><span class="text-purple-400">${actionDesc}</span></p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            workflowList.appendChild(newWorkflowCard);
+            
+            // Reset editor state
+            canvas.innerHTML = '<svg id="workflow-svg-layer"></svg>'; // Keep svg layer
+            nodes = [];
+            connections = [];
+            nodeIdCounter = 0;
+            
+            closeModal('workflowEditorModal');
+            showToast(`工作流 "${workflowName}" 已保存!`);
+        }
 
         // --- Dashboard Chart Logic ---
         const ctx = document.getElementById('sentimentChart').getContext('2d');
