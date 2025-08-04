@@ -9,8 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/d3-cloud@1.2.5/build/d3.layout.cloud.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-cloud@1.2.5/build/d3.layout.cloud.js"></script>
 
     <style>
         :root {
@@ -909,6 +909,7 @@
 
     <script>
         // --- Core UI Logic ---
+        // --- Core UI Logic ---
         function switchView(viewId, element) {
             document.querySelectorAll('.view-content').forEach(view => {
                 view.classList.add('hidden');
@@ -927,6 +928,12 @@
                 el.offsetHeight; /* trigger reflow */
                 el.style.animation = null; 
             });
+
+            // 修正: 当切换到仪表盘时，调用防抖处理后的函数来重绘词云
+            // 这确保了在容器尺寸稳定后再进行渲染
+            if (viewId === 'dashboard') {
+                debouncedRenderWordCloud();
+            }
         }
 
         function showToast(message) {
@@ -1010,7 +1017,7 @@
         let connections = [];
         let nodeIdCounter = 0;
         let selectedNode = null;
-        let selectedConnection = null; // NEW: To track selected connection
+        let selectedConnection = null;
         let isDraggingNode = false;
         let dragOffsetX, dragOffsetY;
         let tempLine = null;
@@ -1073,16 +1080,14 @@
         }
 
         function selectNode(nodeData) {
-            deselectAll(); // Use the new deselectAll function
+            deselectAll(); 
             selectedNode = nodeData;
             document.getElementById(nodeData.id).classList.add('selected');
             propertiesPanel.classList.remove('hidden');
             renderProperties(nodeData);
         }
         
-        // RENAMED and MODIFIED from deselectAllNodes
         function deselectAll(event) {
-            // Check if the click is on the canvas itself or the SVG layer, not on a node
             if (event && event.target !== canvas && !event.target.closest('svg')) {
                 return;
             }
@@ -1095,22 +1100,19 @@
 
             if (selectedConnection) {
                 selectedConnection = null;
-                // Redrawing is the simplest way to remove the 'selected' class from the old connection
                 updateConnections();
             }
         }
 
-        // MODIFIED to fix dragging issue
         function startDragNode(e) {
             if (e.target.classList.contains('node-connector')) return;
             e.preventDefault();
             const nodeElement = e.currentTarget;
             
-            // Find the corresponding node object from our data array
             const nodeData = nodes.find(n => n.id === nodeElement.id);
             if (!nodeData) return;
 
-            selectNode(nodeData); // Select the node being dragged
+            selectNode(nodeData); 
             isDraggingNode = true;
             
             dragOffsetX = e.clientX - nodeElement.offsetLeft;
@@ -1122,20 +1124,15 @@
                 let x = moveEvent.clientX - dragOffsetX;
                 let y = moveEvent.clientY - dragOffsetY;
                 
-                // Constrain node within canvas boundaries
                 x = Math.max(0, Math.min(x, canvas.clientWidth - nodeElement.offsetWidth));
                 y = Math.max(0, Math.min(y, canvas.clientHeight - nodeElement.offsetHeight));
 
                 nodeElement.style.left = `${x}px`;
                 nodeElement.style.top = `${y}px`;
                 
-                // *** IMPORTANT FIX ***
-                // Update the node's position in the central data array.
-                // This is crucial for `updateConnections` to get the correct coordinates.
                 nodeData.x = x;
                 nodeData.y = y;
                 
-                // Redraw connections in real-time while dragging
                 updateConnections();
             };
             
@@ -1173,7 +1170,6 @@
             descElement.textContent = descText;
         }
 
-        // Connection Logic
         canvas.addEventListener('mousedown', (e) => {
             if (e.target.classList.contains('node-connector')) {
                 startConnector = e.target;
@@ -1200,7 +1196,6 @@
             tempLine.setAttribute('d', d);
         }
 
-        // MODIFIED to prevent duplicates and auto-select
         function endConnection(e) {
             if (tempLine) {
                 tempLine.remove();
@@ -1217,12 +1212,11 @@
                     const fromNodeId = startType === 'output' ? startNodeId : endNodeId;
                     const toNodeId = startType === 'output' ? endNodeId : startNodeId;
 
-                    // Prevent duplicate connections
                     const connectionExists = connections.some(c => c.from === fromNodeId && c.to === toNodeId);
                     if (!connectionExists) {
                         const newConnection = { from: fromNodeId, to: toNodeId };
                         connections.push(newConnection);
-                        selectConnection(newConnection); // Select the new connection
+                        selectConnection(newConnection);
                     } else {
                         showToast('连接已存在');
                     }
@@ -1231,10 +1225,9 @@
             startConnector = null;
             document.removeEventListener('mousemove', drawTempLine);
             document.removeEventListener('mouseup', endConnection);
-            updateConnections(); // Final redraw
+            updateConnections();
         }
 
-        // MODIFIED to handle selection styling and click events
         function updateConnections() {
             svgLayer.innerHTML = '';
             connections.forEach(conn => {
@@ -1252,14 +1245,12 @@
                 path.setAttribute('d', d);
                 path.setAttribute('stroke-dasharray', '1000');
 
-                // Check if this connection is the selected one
                 if (selectedConnection && selectedConnection.from === conn.from && selectedConnection.to === conn.to) {
                     path.classList.add('selected');
                 }
 
-                // Add event listener to make the connection selectable
                 path.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Prevent canvas click from deselecting
+                    e.stopPropagation();
                     selectConnection(conn);
                 });
 
@@ -1267,14 +1258,12 @@
             });
         }
 
-        // NEW function to select a connection
         function selectConnection(conn) {
-            deselectAll(); // Deselect any currently selected node
+            deselectAll();
             selectedConnection = conn;
-            updateConnections(); // Redraw to apply the 'selected' class
+            updateConnections();
         }
         
-        // NEW function to delete selected element
         function deleteSelected() {
             let deleted = false;
             if (selectedNode) {
@@ -1297,15 +1286,13 @@
             }
         }
 
-        // NEW: Add keyboard listener for delete functionality
         document.addEventListener('keydown', (e) => {
-            // Only trigger if not typing in an input field
             if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
                 return;
             }
 
             if (e.key === 'Delete' || e.key === 'Backspace') {
-                e.preventDefault(); // Prevent browser from navigating back
+                e.preventDefault();
                 deleteSelected();
             }
         });
@@ -1320,7 +1307,6 @@
                 return;
             }
             
-            // For simplicity, we'll just use the first trigger and action found
             const triggerDesc = document.getElementById(`desc-${triggerNode.id}`).textContent;
             const actionDesc = document.getElementById(`desc-${actionNode.id}`).textContent;
 
@@ -1350,7 +1336,6 @@
             `;
             workflowList.appendChild(newWorkflowCard);
             
-            // Reset editor state
             canvas.querySelector('#workflow-svg-layer').innerHTML = '';
             canvas.querySelectorAll('.canvas-node').forEach(n => n.remove());
             nodes = [];
@@ -1442,47 +1427,63 @@
             {text: '价格', size: 35}, {text: '内饰', size: 32},
         ];
 
-        let wordCloudRendered = false;
+        // 新增: 防抖工具函数，用于延迟函数执行，防止在高频触发（如resize）时造成性能问题
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
         function renderWordCloud() {
-            if (wordCloudRendered) return;
             const container = document.getElementById('wordCloud');
-            if (!container || container.clientWidth === 0) return;
+            if (!container || container.clientWidth === 0 || container.clientHeight === 0) {
+                return;
+            }
+
+            function draw(words) {
+                const svgContainer = d3.select("#wordCloud");
+                svgContainer.selectAll("*").remove(); // 清除旧的SVG，防止重复渲染
+                svgContainer.append("svg")
+                    .attr("width", layout.size()[0])
+                    .attr("height", layout.size()[1])
+                    .append("g")
+                    .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
+                    .selectAll("text")
+                    .data(words)
+                    .enter().append("text")
+                    .style("font-size", d => d.size + "px")
+                    .style("font-family", "Noto Sans SC")
+                    .style("fill", d => d.color || '#00f2ff')
+                    .attr("text-anchor", "middle")
+                    .attr("transform", d => "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")")
+                    .text(d => d.text)
+                    .style("opacity", 0)
+                    .transition()
+                    .duration(1000)
+                    .style("opacity", 1);
+            }
 
             const layout = d3.layout.cloud()
-                .size([container.clientWidth, 256])
+                .size([container.clientWidth, container.clientHeight])
                 .words(words)
                 .padding(5)
                 .rotate(() => (~~(Math.random() * 6) - 3) * 15)
                 .font('Noto Sans SC')
-                .fontSize(d => d.size / 2) // scale down size for display
+                // 修正: 确保布局算法使用的字体大小与最终渲染的大小一致
+                .fontSize(d => d.size)
                 .on("end", draw);
 
             layout.start();
-            wordCloudRendered = true;
         }
-
-        function draw(words) {
-            const container = d3.select("#wordCloud");
-            container.selectAll("*").remove(); // Clear previous render
-            container.append("svg")
-                .attr("width", layout.size()[0])
-                .attr("height", layout.size()[1])
-                .append("g")
-                .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
-                .selectAll("text")
-                .data(words)
-                .enter().append("text")
-                .style("font-size", d => d.size + "px")
-                .style("font-family", "Noto Sans SC")
-                .style("fill", d => d.color || '#00f2ff')
-                .attr("text-anchor", "middle")
-                .attr("transform", d => "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")")
-                .text(d => d.text)
-                .style("opacity", 0)
-                .transition()
-                .duration(1000)
-                .style("opacity", 1);
-        }
+        
+        // 新增: 创建一个经过防抖处理的渲染函数
+        const debouncedRenderWordCloud = debounce(renderWordCloud, 100);
 
         // Initial setup
         document.addEventListener('DOMContentLoaded', () => {
@@ -1491,9 +1492,12 @@
             if(initialLink) {
                 switchView(initialView, initialLink);
             }
+            // 首次渲染
             renderWordCloud();
-            new ResizeObserver(renderWordCloud).observe(document.getElementById('wordCloud'));
+            // 修正: 监听容器尺寸变化时，调用防抖处理过的函数，以获得稳定的尺寸
+            new ResizeObserver(debouncedRenderWordCloud).observe(document.getElementById('wordCloud'));
         });
+
     </script>
 </body>
 </html>
