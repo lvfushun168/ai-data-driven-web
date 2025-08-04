@@ -288,6 +288,17 @@
             stroke-width: 3;
             fill: none;
             animation: dash 2s linear infinite;
+            pointer-events: auto; /* Allow clicks on paths */
+            cursor: pointer;
+            transition: stroke-width 0.2s ease, stroke 0.2s ease;
+        }
+        #workflow-svg-layer path:hover {
+            stroke-width: 5;
+        }
+        #workflow-svg-layer path.selected {
+            stroke: var(--secondary-color);
+            stroke-width: 5;
+            animation: none; /* Stop animation when selected */
         }
         @keyframes dash {
             from {
@@ -392,7 +403,7 @@
                     <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
                         <div class="p-4 bg-gray-900/50 rounded-lg border-l-4 border-cyan-400">
                             <div class="flex justify-between items-center mb-1">
-                                <h4 class="font-bold text-cyan-300">【钉钉】鲲鹏V3.5项目冲刺群</h4>
+                                <h4 class="font-bold text-cyan-300">【钉钉】F3项目交付冲刺群</h4>
                                 <span class="text-xs text-gray-500">5分钟前</span>
                             </div>
                             <p class="text-sm text-gray-300">摘要：会议确定了下周交付的最终checklist，@张伟 负责的渲染引擎优化需在周三前完成。发现一个潜在风险：供应链芯片可能延迟到货。</p>
@@ -654,7 +665,7 @@
                 <div class="lg:col-span-2 space-y-6">
                     <div class="glassmorphism rounded-xl p-6 fade-in-up">
                         <h3 class="text-xl font-bold mb-4">高频问题 (FAQ) & 解决方案</h3>
-                        <div class="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                        <div id="faq-list" class="space-y-4 max-h-[600px] overflow-y-auto pr-2">
                              <div class="p-4 bg-gray-900/50 rounded-lg">
                                 <p class="font-bold text-cyan-300">Q: NE-900升级后，哨兵模式耗电过快怎么办？</p>
                                 <p class="text-sm text-gray-300 mt-2">A: 这是已知问题，临时解决方案是关闭行车记录仪的碰撞检测灵敏度。研发已在排查，预计下个版本修复。 <span class="text-xs text-gray-500">(来源: 售后支持群)</span></p>
@@ -663,14 +674,54 @@
                                 <p class="font-bold text-cyan-300">Q: 如何在车机上安装第三方应用？</p>
                                 <p class="text-sm text-gray-300 mt-2">A: 目前系统暂不支持。但有用户在论坛分享了通过开发者模式安装的方法，存在风险，不建议普通用户尝试。 <span class="text-xs text-gray-500">(来源: 汽车之家论坛)</span></p>
                             </div>
+                            <div class="p-4 bg-gray-900/50 rounded-lg">
+                                <p class="font-bold text-cyan-300">Q: 预约充电为什么没有在设定时间启动？</p>
+                                <p class="text-sm text-gray-300 mt-2">A: 请检查车辆是否在线、地锁是否降下，以及充电枪是否正确连接。部分第三方充电桩可能存在兼容性问题。 <span class="text-xs text-gray-500">(来源: 用户APP反馈)</span></p>
+                            </div>
+                            <div class="p-4 bg-gray-900/50 rounded-lg">
+                                <p class="font-bold text-cyan-300">Q: 车辆的L2级辅助驾驶在雨雪天气会失效吗？</p>
+                                <p class="text-sm text-gray-300 mt-2">A: 在极端天气下，摄像头和雷达等传感器性能会受影响，系统可能会临时禁用或降低功能，这是安全设计。 <span class="text-xs text-gray-500">(来源: 技术支持群)</span></p>
+                            </div>
+                            <div class="p-4 bg-gray-900/50 rounded-lg">
+                                <p class="font-bold text-cyan-300">Q: 手机蓝牙钥匙感应不灵敏，经常需要掏出手机解锁？</p>
+                                <p class="text-sm text-gray-300 mt-2">A: 尝试在手机APP中重新校准蓝牙钥匙，并确保手机的蓝牙和定位服务权限已为应用开启。 <span class="text-xs text-gray-500">(来源: 知乎用户提问)</span></p>
+                            </div>
+                             <div class="p-4 bg-gray-900/50 rounded-lg">
+                                <p class="font-bold text-cyan-300">Q: 动力电池的质保政策是怎样的？</p>
+                                <p class="text-sm text-gray-300 mt-2">A: 我们提供8年或16万公里的三电系统质保，以先到者为准，具体条款请查阅您的购车合同或用户手册。 <span class="text-xs text-gray-500">(来源: 官网政策)</span></p>
+                            </div>
+                            <div class="p-4 bg-gray-900/50 rounded-lg">
+                                <p class="font-bold text-cyan-300">Q: 如何查看车辆的实时胎压？</p>
+                                <p class="text-sm text-gray-300 mt-2">A: 在中控屏的“车辆状态”应用中可以查看四个轮胎的实时压力和温度。当胎压异常时系统会自动告警。 <span class="text-xs text-gray-500">(来源: 产品说明文档)</span></p>
+                            </div>
+                             <div class="p-4 bg-gray-900/50 rounded-lg">
+                                <p class="font-bold text-cyan-300">Q: OTA升级失败卡在50%怎么办？</p>
+                                <p class="text-sm text-gray-300 mt-2">A: 请确保车辆停在网络信号良好的地方（如开阔的地面停车场），并保持电量在40%以上。如果多次尝试失败，请联系400客服或预约到店处理。 <span class="text-xs text-gray-500">(来源: 售后支持群)</span></p>
+                            </div>
                         </div>
                     </div>
                      <div class="glassmorphism rounded-xl p-6 fade-in-up">
                         <h3 class="text-xl font-bold mb-4">典型故障案例库</h3>
-                         <div class="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                         <div id="case-library-list" class="space-y-4 max-h-[300px] overflow-y-auto pr-2">
                             <div class="p-4 bg-gray-900/50 rounded-lg">
                                 <p class="font-bold text-yellow-300">案例#23041: 空调压缩机异响</p>
                                 <p class="text-sm text-gray-300 mt-2">现象: 在特定转速下，空调发出规律性高频噪音。诊断: 压缩机某批次支架存在设计缺陷。解决方案: 免费更换改进后的支架。 <span class="text-xs text-gray-500">(来源: 销服群)</span></p>
+                            </div>
+                            <div class="p-4 bg-gray-900/50 rounded-lg">
+                                <p class="font-bold text-yellow-300">案例#23052: 动力系统故障码 P0A7F (电池模块过热)</p>
+                                <p class="text-sm text-gray-300 mt-2">现象: 车辆在高速行驶后仪表盘报动力系统故障，加速受限。诊断: 读取故障码为P0A7F，检查发现3号电池模组温度传感器读数异常。解决方案: 更换3号模组的温度传感器，并对BMS进行软件重校准。 <span class="text-xs text-gray-500">(来源: 维修案例库)</span></p>
+                            </div>
+                            <div class="p-4 bg-gray-900/50 rounded-lg">
+                                <p class="font-bold text-yellow-300">案例#23061: 充电口盖无法打开</p>
+                                <p class="text-sm text-gray-300 mt-2">现象: 按下中控或钥匙上的充电口盖开启键，电机无反应。诊断: 检查发现控制充电口盖的执行器电机保险丝熔断。进一步排查发现电机本身因进水导致短路。解决方案: 更换充电口盖执行器电机总成，并加装新的防水密封圈。 <span class="text-xs text-gray-500">(来源: 售后通报)</span></p>
+                            </div>
+                            <div class="p-4 bg-gray-900/50 rounded-lg">
+                                <p class="font-bold text-yellow-300">案例#23075: 中控屏频繁黑屏重启</p>
+                                <p class="text-sm text-gray-300 mt-2">现象: 行车过程中，中控娱乐屏无故黑屏，数秒后自动重启。诊断: 确认车辆软件为最新版本。检查域控制器日志，发现内存溢出错误。解决方案: 通过OTA推送了针对性的补丁程序，优化了内存管理机制。 <span class="text-xs text-gray-500">(来源: 研发日志)</span></p>
+                            </div>
+                             <div class="p-4 bg-gray-900/50 rounded-lg">
+                                <p class="font-bold text-yellow-300">案例#23088: 车辆休眠后耗电异常</p>
+                                <p class="text-sm text-gray-300 mt-2">现象: 车辆锁定并静置一夜后，电量下降超过5%。诊断: 使用专用设备监测车辆休眠电流，发现网关模块（Gateway）未按预期进入深度休眠。解决方案: 重新刷写网关模块固件，解决了其无法进入低功耗模式的问题。 <span class="text-xs text-gray-500">(来源: 维修案例库)</span></p>
                             </div>
                          </div>
                     </div>
@@ -697,6 +748,20 @@
                                 <div>
                                     <p class="font-bold">李静</p>
                                     <p class="text-xs text-cyan-400">领域: 电池BMS, 热管理</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <img src="https://i.pravatar.cc/40?u=wang-chao" class="w-10 h-10 rounded-full" alt="王超头像">
+                                <div>
+                                    <p class="font-bold">王超</p>
+                                    <p class="text-xs text-cyan-400">领域: 智能座舱, HMI交互</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <img src="https://i.pravatar.cc/40?u=chen-yue" class="w-10 h-10 rounded-full" alt="陈悦头像">
+                                <div>
+                                    <p class="font-bold">陈悦</p>
+                                    <p class="text-xs text-cyan-400">领域: 自动驾驶, 传感器融合</p>
                                 </div>
                             </div>
                         </div>
@@ -826,7 +891,7 @@
                     </div>
                 </aside>
                 <!-- Canvas -->
-                <main id="workflow-canvas" class="flex-grow relative" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" onclick="deselectAllNodes(event)">
+                <main id="workflow-canvas" class="flex-grow relative" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" onclick="deselectAll(event)">
                     <svg id="workflow-svg-layer"></svg>
                     <!-- Nodes will be added here dynamically -->
                 </main>
@@ -945,6 +1010,7 @@
         let connections = [];
         let nodeIdCounter = 0;
         let selectedNode = null;
+        let selectedConnection = null; // NEW: To track selected connection
         let isDraggingNode = false;
         let dragOffsetX, dragOffsetY;
         let tempLine = null;
@@ -979,7 +1045,7 @@
             nodeElement.style.left = `${x}px`;
             nodeElement.style.top = `${y}px`;
             
-            let title, description, icon, colorClass;
+            let title, description, colorClass;
             if (type.startsWith('trigger')) {
                 colorClass = 'border-cyan-400';
                 if (type === 'trigger-keyword') { title = '关键词检测'; description = '未配置'; nodeData.properties = { keywords: '' }; }
@@ -1007,44 +1073,69 @@
         }
 
         function selectNode(nodeData) {
-            deselectAllNodes();
+            deselectAll(); // Use the new deselectAll function
             selectedNode = nodeData;
             document.getElementById(nodeData.id).classList.add('selected');
             propertiesPanel.classList.remove('hidden');
             renderProperties(nodeData);
         }
         
-        function deselectAllNodes(event) {
-            if (event && event.target !== canvas) return;
+        // RENAMED and MODIFIED from deselectAllNodes
+        function deselectAll(event) {
+            // Check if the click is on the canvas itself or the SVG layer, not on a node
+            if (event && event.target !== canvas && !event.target.closest('svg')) {
+                return;
+            }
+            
             if (selectedNode) {
                 document.getElementById(selectedNode.id)?.classList.remove('selected');
             }
             selectedNode = null;
             propertiesPanel.classList.add('hidden');
+
+            if (selectedConnection) {
+                selectedConnection = null;
+                // Redrawing is the simplest way to remove the 'selected' class from the old connection
+                updateConnections();
+            }
         }
 
+        // MODIFIED to fix dragging issue
         function startDragNode(e) {
             if (e.target.classList.contains('node-connector')) return;
             e.preventDefault();
             const nodeElement = e.currentTarget;
+            
+            // Find the corresponding node object from our data array
+            const nodeData = nodes.find(n => n.id === nodeElement.id);
+            if (!nodeData) return;
+
+            selectNode(nodeData); // Select the node being dragged
             isDraggingNode = true;
-            selectNode(nodes.find(n => n.id === nodeElement.id));
+            
             dragOffsetX = e.clientX - nodeElement.offsetLeft;
             dragOffsetY = e.clientY - nodeElement.offsetTop;
             
             document.onmousemove = (moveEvent) => {
                 if (!isDraggingNode) return;
-                const rect = canvas.getBoundingClientRect();
+                
                 let x = moveEvent.clientX - dragOffsetX;
                 let y = moveEvent.clientY - dragOffsetY;
                 
+                // Constrain node within canvas boundaries
                 x = Math.max(0, Math.min(x, canvas.clientWidth - nodeElement.offsetWidth));
                 y = Math.max(0, Math.min(y, canvas.clientHeight - nodeElement.offsetHeight));
 
                 nodeElement.style.left = `${x}px`;
                 nodeElement.style.top = `${y}px`;
-                selectedNode.x = x;
-                selectedNode.y = y;
+                
+                // *** IMPORTANT FIX ***
+                // Update the node's position in the central data array.
+                // This is crucial for `updateConnections` to get the correct coordinates.
+                nodeData.x = x;
+                nodeData.y = y;
+                
+                // Redraw connections in real-time while dragging
                 updateConnections();
             };
             
@@ -1109,30 +1200,41 @@
             tempLine.setAttribute('d', d);
         }
 
+        // MODIFIED to prevent duplicates and auto-select
         function endConnection(e) {
             if (tempLine) {
                 tempLine.remove();
                 tempLine = null;
             }
-            if (e.target.classList.contains('node-connector') && e.target !== startConnector) {
-                const endConnector = e.target;
+            const endConnector = e.target.closest('.node-connector');
+            if (endConnector && endConnector !== startConnector) {
                 const startNodeId = startConnector.dataset.nodeId;
                 const endNodeId = endConnector.dataset.nodeId;
                 const startType = startConnector.dataset.connectorType;
                 const endType = endConnector.dataset.connectorType;
 
                 if (startNodeId !== endNodeId && startType !== endType) {
-                    const fromNode = startType === 'output' ? startNodeId : endNodeId;
-                    const toNode = startType === 'output' ? endNodeId : startNodeId;
-                    connections.push({ from: fromNode, to: toNode });
-                    updateConnections();
+                    const fromNodeId = startType === 'output' ? startNodeId : endNodeId;
+                    const toNodeId = startType === 'output' ? endNodeId : startNodeId;
+
+                    // Prevent duplicate connections
+                    const connectionExists = connections.some(c => c.from === fromNodeId && c.to === toNodeId);
+                    if (!connectionExists) {
+                        const newConnection = { from: fromNodeId, to: toNodeId };
+                        connections.push(newConnection);
+                        selectConnection(newConnection); // Select the new connection
+                    } else {
+                        showToast('连接已存在');
+                    }
                 }
             }
             startConnector = null;
             document.removeEventListener('mousemove', drawTempLine);
             document.removeEventListener('mouseup', endConnection);
+            updateConnections(); // Final redraw
         }
 
+        // MODIFIED to handle selection styling and click events
         function updateConnections() {
             svgLayer.innerHTML = '';
             connections.forEach(conn => {
@@ -1149,10 +1251,65 @@
                 const d = `M ${startX} ${startY} C ${startX + 70} ${startY}, ${endX - 70} ${endY}, ${endX} ${endY}`;
                 path.setAttribute('d', d);
                 path.setAttribute('stroke-dasharray', '1000');
+
+                // Check if this connection is the selected one
+                if (selectedConnection && selectedConnection.from === conn.from && selectedConnection.to === conn.to) {
+                    path.classList.add('selected');
+                }
+
+                // Add event listener to make the connection selectable
+                path.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent canvas click from deselecting
+                    selectConnection(conn);
+                });
+
                 svgLayer.appendChild(path);
             });
         }
+
+        // NEW function to select a connection
+        function selectConnection(conn) {
+            deselectAll(); // Deselect any currently selected node
+            selectedConnection = conn;
+            updateConnections(); // Redraw to apply the 'selected' class
+        }
         
+        // NEW function to delete selected element
+        function deleteSelected() {
+            let deleted = false;
+            if (selectedNode) {
+                const nodeId = selectedNode.id;
+                document.getElementById(nodeId)?.remove();
+                nodes = nodes.filter(n => n.id !== nodeId);
+                connections = connections.filter(c => c.from !== nodeId && c.to !== nodeId);
+                selectedNode = null;
+                propertiesPanel.classList.add('hidden');
+                deleted = true;
+            } else if (selectedConnection) {
+                connections = connections.filter(c => c.from !== selectedConnection.from || c.to !== selectedConnection.to);
+                selectedConnection = null;
+                deleted = true;
+            }
+            
+            if (deleted) {
+                showToast('已删除所选元素');
+                updateConnections();
+            }
+        }
+
+        // NEW: Add keyboard listener for delete functionality
+        document.addEventListener('keydown', (e) => {
+            // Only trigger if not typing in an input field
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                e.preventDefault(); // Prevent browser from navigating back
+                deleteSelected();
+            }
+        });
+
         function saveWorkflow() {
             const workflowName = document.getElementById('workflowName').value || '未命名工作流';
             const triggerNode = nodes.find(n => n.type.startsWith('trigger'));
@@ -1194,10 +1351,12 @@
             workflowList.appendChild(newWorkflowCard);
             
             // Reset editor state
-            canvas.innerHTML = '<svg id="workflow-svg-layer"></svg>'; // Keep svg layer
+            canvas.querySelector('#workflow-svg-layer').innerHTML = '';
+            canvas.querySelectorAll('.canvas-node').forEach(n => n.remove());
             nodes = [];
             connections = [];
             nodeIdCounter = 0;
+            deselectAll();
             
             closeModal('workflowEditorModal');
             showToast(`工作流 "${workflowName}" 已保存!`);
