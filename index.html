@@ -11,16 +11,21 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-cloud@1.2.5/build/d3.layout.cloud.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
 
     <style>
         :root {
             --bg-color: #0a0a1a;
             --primary-color: #00f2ff;
             --secondary-color: #ff00ff;
+            --accent-color: #00ff8c;
             --border-color: rgba(0, 242, 255, 0.2);
             --card-bg: rgba(10, 20, 40, 0.5);
             --glow-color-primary: rgba(0, 242, 255, 0.5);
             --glow-color-secondary: rgba(255, 0, 255, 0.5);
+            --glow-color-accent: rgba(0, 255, 140, 0.5);
         }
 
         body {
@@ -51,6 +56,11 @@
             color: var(--secondary-color);
             text-shadow: 0 0 5px var(--secondary-color), 0 0 10px var(--secondary-color), 0 0 15px var(--glow-color-secondary);
         }
+        
+        .neon-text-accent {
+            color: var(--accent-color);
+            text-shadow: 0 0 5px var(--accent-color), 0 0 10px var(--accent-color), 0 0 15px var(--glow-color-accent);
+        }
 
         .neon-border {
             border: 1px solid var(--primary-color);
@@ -60,6 +70,11 @@
         .neon-border-secondary {
             border: 1px solid var(--secondary-color);
             box-shadow: 0 0 8px var(--glow-color-secondary), inset 0 0 8px var(--glow-color-secondary);
+        }
+        
+        .neon-border-accent {
+            border: 1px solid var(--accent-color);
+            box-shadow: 0 0 8px var(--glow-color-accent), inset 0 0 8px var(--glow-color-accent);
         }
 
         .sidebar-icon {
@@ -102,6 +117,7 @@
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
+            height: 8px;
         }
         ::-webkit-scrollbar-track {
             background: var(--bg-color);
@@ -308,6 +324,12 @@
                 stroke-dashoffset: 0;
             }
         }
+        /* PrismJS Tomorrow Night theme overrides */
+        pre[class*="language-"] {
+            background: rgba(10, 20, 40, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+        }
     </style>
 </head>
 <body class="flex min-h-screen">
@@ -330,9 +352,10 @@
                 <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                 <span class="hidden lg:inline">数据源管理</span>
             </a>
-            <a href="#insight-engine" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('insight-engine', this)">
-                <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.373 3.373 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
-                <span class="hidden lg:inline">AI洞察引擎</span>
+            <!-- MODIFIED: Renamed "Insight Engine" to "Insight Lab" -->
+            <a href="#insight-lab" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('insight-lab', this)">
+                <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path></svg>
+                <span class="hidden lg:inline">AI 引擎实验室</span>
             </a>
             <a href="#action-center" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('action-center', this)">
                 <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -504,95 +527,60 @@
             </div>
         </div>
 
-        <!-- View: Insight Engine -->
-        <div id="view-insight-engine" class="view-content hidden">
+        <!-- NEW/REDESIGNED View: Insight Lab -->
+        <div id="view-insight-lab" class="view-content hidden">
             <header class="mb-8">
-                <h2 class="text-3xl font-bold font-orbitron">AI 洞察引擎配置</h2>
-                <p class="text-gray-400">配置系统的大脑。自定义分析模块，以满足不同业务场景的需求。</p>
+                <h2 class="text-3xl font-bold font-orbitron">AI 引擎实验室</h2>
+                <p class="text-gray-400">在此处快速测试和验证AI模型的能力，无需创建完整的工作流。</p>
             </header>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="glassmorphism rounded-xl p-6 fade-in-up">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-xl font-bold neon-text-primary">文本摘要</h3>
-                        <label class="switch"><input type="checkbox" checked onclick="showToast('文本摘要已启用')"><span class="slider"></span></label>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-12rem)]">
+                <!-- Input Panel -->
+                <div class="lg:col-span-1 glassmorphism rounded-xl p-4 flex flex-col fade-in-up">
+                    <h3 class="text-xl font-bold mb-4 neon-text-primary">1. 输入原始文本</h3>
+                    <textarea id="lab-input-text" class="w-full flex-grow bg-gray-900/50 border border-gray-700 rounded-md p-3 text-sm resize-none" placeholder="在此处粘贴需要分析的文本，例如会议记录、聊天摘要、用户评论等..."></textarea>
+                </div>
+                
+                <!-- Config & Action Panel -->
+                <div class="lg:col-span-1 glassmorphism rounded-xl p-4 flex flex-col fade-in-up" style="animation-delay: 0.1s;">
+                    <h3 class="text-xl font-bold mb-4 neon-text-accent">2. 配置分析引擎</h3>
+                    <div id="lab-config-panel" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">选择AI能力</label>
+                            <select id="lab-ai-model-select" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2">
+                                <option value="summary">文本摘要</option>
+                                <option value="todo">任务提取 (ToDo)</option>
+                                <option value="sentiment">情感与意图分析</option>
+                                <option value="ner">命名实体识别 (NER)</option>
+                                <option value="topic">主题建模</option>
+                            </select>
+                        </div>
+                        <div id="lab-model-params" class="space-y-3 p-3 border border-gray-700 rounded-md">
+                            <!-- Parameters will be dynamically inserted here -->
+                        </div>
                     </div>
-                    <p class="text-sm text-gray-400 mt-2 mb-4">从海量文本中提炼核心内容。支持不同角色和粒度的摘要。</p>
-                    <div class="space-y-3">
-                        <label class="block text-sm font-medium">摘要类型</label>
-                        <select class="w-full bg-gray-800 border border-gray-700 rounded-md p-2" onchange="showToast('设置已保存')">
-                            <option>通用摘要</option>
-                            <option>上下文感知摘要</option>
-                            <option>角色化摘要 (面向管理者)</option>
-                            <option>角色化摘要 (面向执行者)</option>
-                        </select>
-                        <label class="block text-sm font-medium">生成频率</label>
-                         <select class="w-full bg-gray-800 border border-gray-700 rounded-md p-2" onchange="showToast('设置已保存')">
-                            <option>每日日报</option>
-                            <option>每周周报</option>
-                            <option>实时生成</option>
-                        </select>
+                    <div class="mt-auto">
+                        <button id="lab-run-button" class="btn-primary w-full py-3 rounded-lg font-bold text-lg" onclick="runLabAnalysis()">
+                            运行分析
+                        </button>
                     </div>
                 </div>
-                <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.1s;">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-xl font-bold neon-text-primary">任务提取 (ToDo)</h3>
-                        <label class="switch"><input type="checkbox" checked onclick="showToast('任务提取已启用')"><span class="slider"></span></label>
-                    </div>
-                    <p class="text-sm text-gray-400 mt-2 mb-4">识别对话中的待办事项，并能分析任务依赖关系。</p>
-                    <div class="space-y-3">
-                        <label class="block text-sm font-medium">提取模式</label>
-                        <select class="w-full bg-gray-800 border border-gray-700 rounded-md p-2" onchange="showToast('设置已保存')">
-                            <option>智能提取与推荐负责人</option>
-                            <option>仅提取明确指定的任务</option>
-                        </select>
-                         <label class="block text-sm font-medium">任务链分析</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" class="accent-cyan-400" onchange="showToast('设置已保存')"> 自动分析任务依赖</label>
-                    </div>
-                </div>
-                <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.2s;">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-xl font-bold neon-text-primary">情感与意图分析</h3>
-                        <label class="switch"><input type="checkbox" checked onclick="showToast('情感分析已启用')"><span class="slider"></span></label>
-                    </div>
-                    <p class="text-sm text-gray-400 mt-2 mb-4">分析情绪倾向，并识别投诉、建议、商机等深层意图。</p>
-                    <div class="space-y-3">
-                        <label class="block text-sm font-medium">分析粒度</label>
-                        <select class="w-full bg-gray-800 border border-gray-700 rounded-md p-2" onchange="showToast('设置已保存')">
-                            <option>细粒度情感+意图识别</option>
-                            <option>通用情感 (积极/中性/消极)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.3s;">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-xl font-bold neon-text-primary">主题建模与演化</h3>
-                        <label class="switch"><input type="checkbox" checked onclick="showToast('主题建模已启用')"><span class="slider"></span></label>
-                    </div>
-                    <p class="text-sm text-gray-400 mt-2 mb-4">发现核心讨论主题，并能跨平台追踪话题演化路径。</p>
-                     <div class="space-y-3">
-                         <label class="block text-sm font-medium">话题追踪</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" class="accent-cyan-400" checked onchange="showToast('设置已保存')"> 开启跨平台话题演化分析</label>
-                    </div>
-                </div>
-                <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.4s;">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-xl font-bold neon-text-primary">知识图谱构建</h3>
-                        <label class="switch"><input type="checkbox" checked onclick="showToast('知识图谱已启用')"><span class="slider"></span></label>
-                    </div>
-                    <p class="text-sm text-gray-400 mt-2 mb-4">识别自定义实体，构建动态的“人-事-物”关系网络。</p>
-                    <div class="space-y-3">
-                        <label class="block text-sm font-medium">自定义实体类型</label>
-                        <input type="text" value="BUG编号, 项目代号, 竞品车型" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2" onchange="showToast('设置已保存')">
+
+                <!-- Output Panel -->
+                <div class="lg:col-span-1 glassmorphism rounded-xl p-4 flex flex-col fade-in-up" style="animation-delay: 0.2s;">
+                    <h3 class="text-xl font-bold mb-4 neon-text-secondary">3. 查看分析结果</h3>
+                    <div id="lab-output-container" class="w-full flex-grow bg-gray-900/50 border border-gray-700 rounded-md p-1 overflow-auto">
+                        <pre><code id="lab-output-json" class="language-json text-sm"></code></pre>
                     </div>
                 </div>
             </div>
         </div>
 
+
         <!-- View: Action Center -->
         <div id="view-action-center" class="view-content hidden">
             <header class="mb-8">
                 <h2 class="text-3xl font-bold font-orbitron">自动化行动中心</h2>
-                <p class="text-gray-400">打通“洞察”到“行动”的最后一公里。创建自动化工作流，让洞察自动转化为价值。</p>
+                <p class="text-gray-400">打通“洞察”到“行动”的最后一公里。创建、管理并监控您的自动化工作流。</p>
             </header>
              <div class="mb-6 text-right">
                 <button class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="openModal('workflowEditorModal')">
@@ -600,13 +588,24 @@
                 </button>
             </div>
             <div id="workflow-list" class="space-y-6">
-                <!-- Workflow Rule 1 -->
-                <div class="glassmorphism rounded-xl p-6 fade-in-up neon-border">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-bold">舆情告警工作流</h3>
-                        <label class="switch"><input type="checkbox" checked onclick="showToast('工作流已激活')"><span class="slider"></span></label>
+                <!-- Workflow Card 1 -->
+                <div class="glassmorphism rounded-xl p-0 flex flex-col fade-in-up neon-border">
+                    <!-- Card Header -->
+                    <div class="p-4 flex justify-between items-start border-b border-cyan-500/20">
+                        <div>
+                            <h3 class="text-xl font-bold">舆情告警工作流</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-xs font-bold text-green-400">● 运行中</span>
+                                <label class="switch"><input type="checkbox" checked onchange="toggleWorkflowStatus(this, '舆情告警工作流')"><span class="slider"></span></label>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-400">今日执行: <span class="font-bold text-white">18 次</span></p>
+                            <p class="text-sm text-green-400">成功率: <span class="font-bold">100%</span></p>
+                        </div>
                     </div>
-                    <div class="flex flex-col lg:flex-row items-center gap-4 text-center">
+                    <!-- Card Body -->
+                    <div class="p-4 flex flex-col lg:flex-row items-center gap-4 text-center">
                         <div class="flex-1">
                             <p class="text-sm text-gray-400 mb-1">触发器 (TRIGGER)</p>
                             <div class="bg-gray-900 p-3 rounded-lg">
@@ -625,14 +624,35 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <!-- Workflow Rule 2 -->
-                <div class="glassmorphism rounded-xl p-6 fade-in-up neon-border-secondary" style="animation-delay: 0.2s;">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-bold">项目进度跟进工作流</h3>
-                        <label class="switch"><input type="checkbox" checked onclick="showToast('工作流已激活')"><span class="slider"></span></label>
+                    <!-- Card Footer -->
+                    <div class="p-3 bg-gray-900/30 rounded-b-xl flex justify-between items-center">
+                        <p class="text-xs text-gray-500">上次执行: 5分钟前</p>
+                        <div class="flex gap-2">
+                            <button class="text-xs py-1 px-3 rounded bg-gray-700 hover:bg-gray-600" onclick="openModal('workflowEditorModal')">编辑</button>
+                            <button class="text-xs py-1 px-3 rounded bg-red-800/50 hover:bg-red-800/80" onclick="showToast('工作流已删除')">删除</button>
+                            <button class="text-xs py-1 px-3 rounded bg-cyan-600/50 hover:bg-cyan-600/80" onclick="openLogModal('舆情告警工作流')">查看日志</button>
+                        </div>
                     </div>
-                    <div class="flex flex-col lg:flex-row items-center gap-4 text-center">
+                </div>
+
+                <!-- Workflow Card 2 -->
+                <div class="glassmorphism rounded-xl p-0 flex flex-col fade-in-up neon-border-secondary" style="animation-delay: 0.2s;">
+                     <!-- Card Header -->
+                    <div class="p-4 flex justify-between items-start border-b border-purple-500/20">
+                        <div>
+                            <h3 class="text-xl font-bold">项目进度跟进工作流</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-xs font-bold text-green-400">● 运行中</span>
+                                <label class="switch"><input type="checkbox" checked onchange="toggleWorkflowStatus(this, '项目进度跟进工作流')"><span class="slider"></span></label>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-400">今日执行: <span class="font-bold text-white">42 次</span></p>
+                            <p class="text-sm text-red-400">成功率: <span class="font-bold">95% (2次失败)</span></p>
+                        </div>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="p-4 flex flex-col lg:flex-row items-center gap-4 text-center">
                         <div class="flex-1">
                             <p class="text-sm text-gray-400 mb-1">触发器 (TRIGGER)</p>
                             <div class="bg-gray-900 p-3 rounded-lg">
@@ -649,6 +669,15 @@
                                 <p class="font-mono text-lg font-bold text-gray-400">并且</p>
                                 <p class="font-mono">@ <span class="text-purple-400">【任务负责人】</span>和<span class="text-purple-400">【项目经理】</span></p>
                             </div>
+                        </div>
+                    </div>
+                     <!-- Card Footer -->
+                    <div class="p-3 bg-gray-900/30 rounded-b-xl flex justify-between items-center">
+                        <p class="text-xs text-gray-500">上次执行: 12分钟前</p>
+                        <div class="flex gap-2">
+                            <button class="text-xs py-1 px-3 rounded bg-gray-700 hover:bg-gray-600" onclick="openModal('workflowEditorModal')">编辑</button>
+                            <button class="text-xs py-1 px-3 rounded bg-red-800/50 hover:bg-red-800/80" onclick="showToast('工作流已删除')">删除</button>
+                            <button class="text-xs py-1 px-3 rounded bg-cyan-600/50 hover:bg-cyan-600/80" onclick="openLogModal('项目进度跟进工作流')">查看日志</button>
                         </div>
                     </div>
                 </div>
@@ -769,7 +798,7 @@
                 </div>
             </div>
         </div>
-        
+      
         <!-- View: Settings -->
         <div id="view-settings" class="view-content hidden">
             <header class="mb-8">
@@ -857,17 +886,35 @@
                         <div>
                             <h5 class="font-bold text-cyan-300 mb-2">触发器 (Triggers)</h5>
                             <div class="space-y-2">
-                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'trigger-keyword')">
-                                    <p class="font-bold">关键词检测</p>
-                                    <p class="text-xs text-gray-400">当消息包含特定词汇时</p>
+                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'trigger-source')">
+                                    <p class="font-bold">数据源输入</p>
+                                    <p class="text-xs text-gray-400">当指定数据源有新消息时</p>
                                 </div>
-                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'trigger-sentiment')">
-                                    <p class="font-bold">情感分析</p>
-                                    <p class="text-xs text-gray-400">当消息情感为特定类型时</p>
-                                </div>
-                                 <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'trigger-schedule')">
+                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'trigger-schedule')">
                                     <p class="font-bold">定时触发</p>
                                     <p class="text-xs text-gray-400">在指定时间自动运行</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- NEW: AI Processor Nodes -->
+                        <div>
+                            <h5 class="font-bold text-accent-color mb-2">AI 处理器 (Processors)</h5>
+                            <div class="space-y-2">
+                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'ai-summary')">
+                                    <p class="font-bold">文本摘要</p>
+                                    <p class="text-xs text-gray-400">生成文本的核心摘要</p>
+                                </div>
+                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'ai-todo')">
+                                    <p class="font-bold">任务提取</p>
+                                    <p class="text-xs text-gray-400">从文本中识别待办事项</p>
+                                </div>
+                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'ai-sentiment')">
+                                    <p class="font-bold">情感分析</p>
+                                    <p class="text-xs text-gray-400">分析文本的情感与意图</p>
+                                </div>
+                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'ai-ner')">
+                                    <p class="font-bold">实体识别</p>
+                                    <p class="text-xs text-gray-400">提取人名、产品名等实体</p>
                                 </div>
                             </div>
                         </div>
@@ -905,10 +952,39 @@
             </div>
         </div>
     </div>
+    
+    <!-- Workflow Log Modal -->
+    <div id="workflowLogModal" class="modal-overlay">
+        <div class="modal-content glassmorphism rounded-xl w-full max-w-4xl m-4 flex flex-col h-[80vh]">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0">
+                <div>
+                    <h3 class="text-2xl font-bold font-orbitron">执行日志</h3>
+                    <p id="logModalWorkflowName" class="text-sm text-cyan-400"></p>
+                </div>
+                <button onclick="closeModal('workflowLogModal')" class="text-gray-500 hover:text-white text-3xl leading-none">&times;</button>
+            </div>
+            <div class="p-4 flex-grow overflow-y-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="sticky top-0 bg-gray-900/50 backdrop-blur-sm">
+                        <tr>
+                            <th class="p-2 w-1/4">执行时间</th>
+                            <th class="p-2 w-1/6">结果</th>
+                            <th class="p-2 w-7/12">详细信息</th>
+                        </tr>
+                    </thead>
+                    <tbody id="log-table-body">
+                        <!-- Log rows will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+             <div class="p-4 bg-gray-900/30 rounded-b-xl flex justify-end gap-4 shrink-0">
+                <button type="button" class="btn-secondary py-2 px-5 rounded-lg" onclick="closeModal('workflowLogModal')">关闭</button>
+            </div>
+        </div>
+    </div>
 
 
     <script>
-        // --- Core UI Logic ---
         // --- Core UI Logic ---
         function switchView(viewId, element) {
             document.querySelectorAll('.view-content').forEach(view => {
@@ -929,10 +1005,11 @@
                 el.style.animation = null; 
             });
 
-            // 修正: 当切换到仪表盘时，调用防抖处理后的函数来重绘词云
-            // 这确保了在容器尺寸稳定后再进行渲染
             if (viewId === 'dashboard') {
                 debouncedRenderWordCloud();
+            }
+            if (viewId === 'insight-lab') {
+                initLab();
             }
         }
 
@@ -1006,6 +1083,183 @@
             closeModal('addDataSourceModal');
             showToast(`数据源 "${sourceName}" 添加成功！`);
         }
+        
+        // --- (NEW) Insight Lab Logic ---
+        const labModelSelect = document.getElementById('lab-ai-model-select');
+        const labParamsContainer = document.getElementById('lab-model-params');
+        const labOutputCode = document.getElementById('lab-output-json');
+        const labInputText = document.getElementById('lab-input-text');
+        const labRunButton = document.getElementById('lab-run-button');
+
+        const labModelConfigs = {
+            summary: {
+                name: '文本摘要',
+                params: [
+                    { id: 'summary-type', label: '摘要类型', type: 'select', options: ['通用摘要', '上下文感知摘要', '角色化摘要(管理者)', '角色化摘要(执行者)'] },
+                    { id: 'summary-length', label: '摘要长度', type: 'select', options: ['简短', '中等', '详细'] }
+                ],
+                mockOutput: (text) => ({
+                    summary: `这是关于“${text.substring(0,15)}...”的【${document.getElementById('summary-length')?.value}】摘要。模型类型为【${document.getElementById('summary-type')?.value}】。`,
+                    keywords: ["核心词A", "核心词B", "核心词C"]
+                })
+            },
+            todo: {
+                name: '任务提取 (ToDo)',
+                params: [
+                    { id: 'todo-mode', label: '提取模式', type: 'select', options: ['智能提取', '仅提取明确任务'] }
+                ],
+                mockOutput: () => ({
+                    tasks: [
+                        { task: "完成渲染引擎优化", assignee: "张伟", due_date: "下周三", status: "pending" },
+                        { task: "确认芯片到货日期", assignee: "供应链", due_date: null, status: "pending" }
+                    ]
+                })
+            },
+            sentiment: {
+                name: '情感与意图分析',
+                params: [
+                    { id: 'sentiment-granularity', label: '分析粒度', type: 'select', options: ['细粒度情感+意图', '通用情感(正/中/负)'] }
+                ],
+                mockOutput: () => ({
+                    sentiment: "Negative",
+                    score: -0.85,
+                    emotion: "Complaint",
+                    intents: ["产品槽点", "功能缺陷"]
+                })
+            },
+            ner: {
+                name: '命名实体识别 (NER)',
+                params: [
+                    { id: 'ner-types', label: '自定义实体 (逗号分隔)', type: 'text', placeholder: 'BUG编号, 项目代号' }
+                ],
+                mockOutput: () => ({
+                    entities: [
+                        { text: "张伟", type: "PERSON", start: 50, end: 52 },
+                        { text: "渲染引擎", type: "PRODUCT", start: 60, end: 64 },
+                        { text: "NE-900", type: "竞品车型", start: 120, end: 126 }
+                    ]
+                })
+            },
+            topic: {
+                name: '主题建模',
+                params: [],
+                mockOutput: () => ({
+                    topics: [
+                        { topic: "电池与续航", score: 0.65, keywords: ["电池", "续航", "OTA", "提升"] },
+                        { topic: "车机系统", score: 0.25, keywords: ["车机", "卡顿", "抱怨", "升级"] },
+                        { topic: "智能驾驶", score: 0.10, keywords: ["辅助驾驶", "雨天", "表现", "KOL"] }
+                    ]
+                })
+            }
+        };
+
+        function renderLabParams() {
+            const selectedModel = labModelSelect.value;
+            const config = labModelConfigs[selectedModel];
+            labParamsContainer.innerHTML = `<h4 class="font-bold text-sm mb-2">${config.name} 参数</h4>`;
+            if (config.params.length === 0) {
+                labParamsContainer.innerHTML += `<p class="text-xs text-gray-500">该模型没有可配置参数。</p>`;
+            }
+            config.params.forEach(param => {
+                let inputHtml = '';
+                if (param.type === 'select') {
+                    inputHtml = `<select id="${param.id}" class="w-full bg-gray-700 border border-gray-600 rounded-md p-1.5 text-sm">
+                        ${param.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                    </select>`;
+                } else if (param.type === 'text') {
+                    inputHtml = `<input type="text" id="${param.id}" placeholder="${param.placeholder || ''}" class="w-full bg-gray-700 border border-gray-600 rounded-md p-1.5 text-sm">`;
+                }
+                labParamsContainer.innerHTML += `
+                    <div>
+                        <label for="${param.id}" class="block text-xs font-medium mb-1">${param.label}</label>
+                        ${inputHtml}
+                    </div>
+                `;
+            });
+        }
+
+        function runLabAnalysis() {
+            const text = labInputText.value;
+            if (!text.trim()) {
+                showToast("请输入需要分析的文本");
+                return;
+            }
+            
+            labRunButton.textContent = "分析中...";
+            labRunButton.disabled = true;
+
+            setTimeout(() => {
+                const selectedModel = labModelSelect.value;
+                const mockOutput = labModelConfigs[selectedModel].mockOutput(text);
+                const jsonString = JSON.stringify(mockOutput, null, 2);
+                
+                labOutputCode.textContent = jsonString;
+                Prism.highlightElement(labOutputCode);
+                
+                labRunButton.textContent = "运行分析";
+                labRunButton.disabled = false;
+                showToast("分析完成！");
+            }, 1000); // Simulate API call
+        }
+
+        function initLab() {
+            renderLabParams();
+            labOutputCode.textContent = JSON.stringify({ message: "结果将在此处显示..." }, null, 2);
+            Prism.highlightElement(labOutputCode);
+        }
+
+        labModelSelect.addEventListener('change', renderLabParams);
+
+
+        // --- Action Center Logic ---
+        function toggleWorkflowStatus(checkbox, workflowName) {
+            const card = checkbox.closest('.glassmorphism');
+            const statusText = card.querySelector('.text-xs.font-bold');
+            if (checkbox.checked) {
+                statusText.textContent = '● 运行中';
+                statusText.className = 'text-xs font-bold text-green-400';
+                card.classList.remove('opacity-70');
+                showToast(`工作流 "${workflowName}" 已激活`);
+            } else {
+                statusText.textContent = '● 已暂停';
+                statusText.className = 'text-xs font-bold text-gray-500';
+                card.classList.add('opacity-70');
+                showToast(`工作流 "${workflowName}" 已暂停`);
+            }
+        }
+        
+        const mockLogs = {
+            '舆情告警工作流': [
+                { time: '2025-08-12 16:55:01', status: '成功', message: '触发成功。检测到关键词“失控”，情感“强烈负面”。已在钉钉创建ID为#1024的高优工单并@公关部负责人。' },
+            ],
+            '项目进度跟进工作流': [
+                { time: '2025-08-12 17:00:15', status: '成功', message: '任务 [完成渲染引擎优化] 还有24小时到期，已在 [F3项目交付冲刺群] @张伟 和 @项目经理。' },
+                { time: '2025-08-12 16:48:02', status: '失败', message: '任务 [确认供应链芯片到货日期] 提醒失败。原因: 找不到任务负责人 [李四]，请在任务中心手动指定。' },
+            ],
+        };
+
+        function openLogModal(workflowName) {
+            document.getElementById('logModalWorkflowName').textContent = workflowName;
+            const logBody = document.getElementById('log-table-body');
+            logBody.innerHTML = ''; // Clear previous logs
+
+            const logs = mockLogs[workflowName] || [{ time: new Date().toLocaleString(), status: '信息', message: '暂无该工作流的执行日志。' }];
+            
+            logs.forEach(log => {
+                const row = document.createElement('tr');
+                const statusClass = log.status === '成功' ? 'text-green-400' : (log.status === '失败' ? 'text-red-400' : 'text-gray-400');
+                row.className = 'border-b border-gray-800 hover:bg-gray-800/50';
+                row.innerHTML = `
+                    <td class="p-2 font-mono">${log.time}</td>
+                    <td class="p-2 font-bold ${statusClass}">${log.status}</td>
+                    <td class="p-2 text-gray-300">${log.message}</td>
+                `;
+                logBody.appendChild(row);
+            });
+
+            openModal('workflowLogModal');
+        }
+
 
         // --- Workflow Editor Logic ---
         const canvas = document.getElementById('workflow-canvas');
@@ -1016,12 +1270,23 @@
         let nodes = [];
         let connections = [];
         let nodeIdCounter = 0;
-        let selectedNode = null;
-        let selectedConnection = null;
+        let selectedElement = null;
         let isDraggingNode = false;
         let dragOffsetX, dragOffsetY;
         let tempLine = null;
         let startConnector = null;
+
+        const nodeConfigs = {
+            'trigger-source': { title: '数据源输入', colorClass: 'text-cyan-300', borderColor: 'border-cyan-400', properties: { source: 'dingtalk-group-1' } },
+            'trigger-schedule': { title: '定时触发', colorClass: 'text-cyan-300', borderColor: 'border-cyan-400', properties: { cron: '0 0 * * *' } },
+            'ai-summary': { title: '文本摘要', colorClass: 'text-accent-color', borderColor: 'border-accent-color', properties: { type: '通用摘要', length: '中等' } },
+            'ai-todo': { title: '任务提取', colorClass: 'text-accent-color', borderColor: 'border-accent-color', properties: { mode: '智能提取' } },
+            'ai-sentiment': { title: '情感分析', colorClass: 'text-accent-color', borderColor: 'border-accent-color', properties: { granularity: '细粒度情感+意图' } },
+            'ai-ner': { title: '实体识别', colorClass: 'text-accent-color', borderColor: 'border-accent-color', properties: { customTypes: 'BUG编号, 项目代号' } },
+            'action-notify': { title: '发送钉钉通知', colorClass: 'text-purple-300', borderColor: 'border-purple-400', properties: { channel: '#general', message: '来自OASIS的通知: {{input.summary}}' } },
+            'action-todo': { title: '创建待办事项', colorClass: 'text-purple-300', borderColor: 'border-purple-400', properties: { title: '{{input.task}}', assignee: '{{input.assignee}}' } },
+            'action-webhook': { title: '调用 Webhook', colorClass: 'text-purple-300', borderColor: 'border-purple-400', properties: { url: 'https://api.example.com/hook', payload: '{{input}}' } },
+        };
 
         function handleDragStart(event, nodeType) {
             event.dataTransfer.setData('node-type', nodeType);
@@ -1044,7 +1309,8 @@
 
         function createNode(type, x, y) {
             const nodeId = `node-${nodeIdCounter++}`;
-            const nodeData = { id: nodeId, type, x, y, properties: {} };
+            const config = nodeConfigs[type];
+            const nodeData = { id: nodeId, type, x, y, properties: { ...config.properties } };
             
             const nodeElement = document.createElement('div');
             nodeElement.id = nodeId;
@@ -1052,39 +1318,31 @@
             nodeElement.style.left = `${x}px`;
             nodeElement.style.top = `${y}px`;
             
-            let title, description, colorClass;
-            if (type.startsWith('trigger')) {
-                colorClass = 'border-cyan-400';
-                if (type === 'trigger-keyword') { title = '关键词检测'; description = '未配置'; nodeData.properties = { keywords: '' }; }
-                if (type === 'trigger-sentiment') { title = '情感分析'; description = '未配置'; nodeData.properties = { sentiment: 'positive' }; }
-                if (type === 'trigger-schedule') { title = '定时触发'; description = '未配置'; nodeData.properties = { cron: '0 0 * * *' }; }
-            } else {
-                colorClass = 'border-purple-400';
-                if (type === 'action-notify') { title = '发送钉钉通知'; description = '未配置'; nodeData.properties = { channel: '', message: '' }; }
-                if (type === 'action-todo') { title = '创建待办事项'; description = '未配置'; nodeData.properties = { title: '', assignee: '' }; }
-                if (type === 'action-webhook') { title = '调用 Webhook'; description = '未配置'; nodeData.properties = { url: '' }; }
-            }
-            
             nodeElement.innerHTML = `
-                <p class="font-bold text-sm ${type.startsWith('trigger') ? 'text-cyan-300' : 'text-purple-300'}">${title}</p>
-                <p id="desc-${nodeId}" class="text-xs text-gray-400">${description}</p>
+                <p class="font-bold text-sm ${config.colorClass}">${config.title}</p>
+                <p id="desc-${nodeId}" class="text-xs text-gray-400">未配置</p>
                 <div class="node-connector output" data-node-id="${nodeId}" data-connector-type="output"></div>
                 <div class="node-connector input" data-node-id="${nodeId}" data-connector-type="input"></div>
             `;
-            nodeElement.classList.add(colorClass, 'border-l-4');
+            nodeElement.classList.add(config.borderColor, 'border-l-4');
 
             nodeElement.addEventListener('mousedown', startDragNode);
-            nodeElement.addEventListener('click', (e) => { e.stopPropagation(); selectNode(nodeData); });
+            nodeElement.addEventListener('click', (e) => { e.stopPropagation(); selectElement(nodeData); });
             canvas.appendChild(nodeElement);
             nodes.push(nodeData);
+            updateNodeDescription(nodeData);
         }
 
-        function selectNode(nodeData) {
+        function selectElement(elementData) {
             deselectAll(); 
-            selectedNode = nodeData;
-            document.getElementById(nodeData.id).classList.add('selected');
-            propertiesPanel.classList.remove('hidden');
-            renderProperties(nodeData);
+            selectedElement = elementData;
+            if(elementData.id) { // It's a node
+                document.getElementById(elementData.id).classList.add('selected');
+                propertiesPanel.classList.remove('hidden');
+                renderProperties(elementData);
+            } else { // It's a connection
+                updateConnections();
+            }
         }
         
         function deselectAll(event) {
@@ -1092,14 +1350,12 @@
                 return;
             }
             
-            if (selectedNode) {
-                document.getElementById(selectedNode.id)?.classList.remove('selected');
-            }
-            selectedNode = null;
-            propertiesPanel.classList.add('hidden');
-
-            if (selectedConnection) {
-                selectedConnection = null;
+            if (selectedElement) {
+                if(selectedElement.id) { // Node
+                    document.getElementById(selectedElement.id)?.classList.remove('selected');
+                }
+                selectedElement = null;
+                propertiesPanel.classList.add('hidden');
                 updateConnections();
             }
         }
@@ -1112,7 +1368,7 @@
             const nodeData = nodes.find(n => n.id === nodeElement.id);
             if (!nodeData) return;
 
-            selectNode(nodeData); 
+            selectElement(nodeData); 
             isDraggingNode = true;
             
             dragOffsetX = e.clientX - nodeElement.offsetLeft;
@@ -1146,15 +1402,27 @@
         function renderProperties(nodeData) {
             let formHtml = `<p class="mb-4 text-sm">正在配置: <span class="font-bold">${nodeData.id}</span></p>`;
             for (const key in nodeData.properties) {
-                formHtml += `
-                    <div class="mb-3">
-                        <label class="block text-xs font-medium text-gray-400 mb-1">${key}</label>
-                        <input type="text" data-property="${key}" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-sm" value="${nodeData.properties[key]}">
-                    </div>
-                `;
+                const value = nodeData.properties[key];
+                // A more robust solution would use a schema to define input types
+                let inputType = 'text';
+                if (key.includes('payload') || key.includes('message')) {
+                    formHtml += `
+                        <div class="mb-3">
+                            <label class="block text-xs font-medium text-gray-400 mb-1">${key}</label>
+                            <textarea data-property="${key}" rows="3" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-sm resize-none">${value}</textarea>
+                        </div>
+                    `;
+                } else {
+                     formHtml += `
+                        <div class="mb-3">
+                            <label class="block text-xs font-medium text-gray-400 mb-1">${key}</label>
+                            <input type="text" data-property="${key}" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-sm" value="${value}">
+                        </div>
+                    `;
+                }
             }
             propertiesContent.innerHTML = formHtml;
-            propertiesContent.querySelectorAll('input').forEach(input => {
+            propertiesContent.querySelectorAll('input, textarea').forEach(input => {
                 input.addEventListener('input', (e) => {
                     nodeData.properties[e.target.dataset.property] = e.target.value;
                     updateNodeDescription(nodeData);
@@ -1164,10 +1432,9 @@
         
         function updateNodeDescription(nodeData) {
             const descElement = document.getElementById(`desc-${nodeData.id}`);
-            let descText = '已配置';
-            if (nodeData.type === 'trigger-keyword') descText = `关键词: ${nodeData.properties.keywords.substring(0,10) || '...'}`;
-            if (nodeData.type === 'action-notify') descText = `通知: ${nodeData.properties.channel.substring(0,10) || '...'}`;
-            descElement.textContent = descText;
+            const firstPropValue = Object.values(nodeData.properties)[0];
+            let descText = `${firstPropValue}`.substring(0, 20) + (`${firstPropValue}`.length > 20 ? '...' : '');
+            descElement.textContent = descText || '已配置';
         }
 
         canvas.addEventListener('mousedown', (e) => {
@@ -1192,7 +1459,7 @@
             const startY = startRect.top + startRect.height / 2 - canvasRect.top;
             const endX = e.clientX - canvasRect.left;
             const endY = e.clientY - canvasRect.top;
-            const d = `M ${startX} ${startY} C ${startX + 50} ${startY}, ${endX - 50} ${endY}, ${endX} ${endY}`;
+            const d = `M ${startX} ${startY} C ${startX + 70} ${startY}, ${endX - 70} ${endY}, ${endX} ${endY}`;
             tempLine.setAttribute('d', d);
         }
 
@@ -1216,7 +1483,7 @@
                     if (!connectionExists) {
                         const newConnection = { from: fromNodeId, to: toNodeId };
                         connections.push(newConnection);
-                        selectConnection(newConnection);
+                        selectElement(newConnection);
                     } else {
                         showToast('连接已存在');
                     }
@@ -1245,39 +1512,33 @@
                 path.setAttribute('d', d);
                 path.setAttribute('stroke-dasharray', '1000');
 
-                if (selectedConnection && selectedConnection.from === conn.from && selectedConnection.to === conn.to) {
+                if (selectedElement && selectedElement.from === conn.from && selectedElement.to === conn.to) {
                     path.classList.add('selected');
                 }
 
                 path.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    selectConnection(conn);
+                    selectElement(conn);
                 });
 
                 svgLayer.appendChild(path);
             });
         }
-
-        function selectConnection(conn) {
-            deselectAll();
-            selectedConnection = conn;
-            updateConnections();
-        }
         
         function deleteSelected() {
             let deleted = false;
-            if (selectedNode) {
-                const nodeId = selectedNode.id;
-                document.getElementById(nodeId)?.remove();
-                nodes = nodes.filter(n => n.id !== nodeId);
-                connections = connections.filter(c => c.from !== nodeId && c.to !== nodeId);
-                selectedNode = null;
+            if (selectedElement) {
+                if (selectedElement.id) { // Node
+                    const nodeId = selectedElement.id;
+                    document.getElementById(nodeId)?.remove();
+                    nodes = nodes.filter(n => n.id !== nodeId);
+                    connections = connections.filter(c => c.from !== nodeId && c.to !== nodeId);
+                } else { // Connection
+                    connections = connections.filter(c => c.from !== selectedElement.from || c.to !== selectedElement.to);
+                }
+                deleted = true;
+                selectedElement = null;
                 propertiesPanel.classList.add('hidden');
-                deleted = true;
-            } else if (selectedConnection) {
-                connections = connections.filter(c => c.from !== selectedConnection.from || c.to !== selectedConnection.to);
-                selectedConnection = null;
-                deleted = true;
             }
             
             if (deleted) {
@@ -1290,7 +1551,6 @@
             if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
                 return;
             }
-
             if (e.key === 'Delete' || e.key === 'Backspace') {
                 e.preventDefault();
                 deleteSelected();
@@ -1299,52 +1559,14 @@
 
         function saveWorkflow() {
             const workflowName = document.getElementById('workflowName').value || '未命名工作流';
-            const triggerNode = nodes.find(n => n.type.startsWith('trigger'));
-            const actionNode = nodes.find(n => n.type.startsWith('action'));
-
-            if (!triggerNode || !actionNode || connections.length === 0) {
-                showToast('错误: 工作流不完整，请至少连接一个触发器和一个动作');
+            if (nodes.length < 2 || connections.length === 0) {
+                showToast('错误: 工作流不完整，请至少连接两个节点');
                 return;
             }
             
-            const triggerDesc = document.getElementById(`desc-${triggerNode.id}`).textContent;
-            const actionDesc = document.getElementById(`desc-${actionNode.id}`).textContent;
-
-            const workflowList = document.getElementById('workflow-list');
-            const newWorkflowCard = document.createElement('div');
-            newWorkflowCard.className = 'glassmorphism rounded-xl p-6 fade-in-up neon-border';
-            newWorkflowCard.innerHTML = `
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold">${workflowName}</h3>
-                    <label class="switch"><input type="checkbox" checked onclick="showToast('工作流已激活')"><span class="slider"></span></label>
-                </div>
-                <div class="flex flex-col lg:flex-row items-center gap-4 text-center">
-                    <div class="flex-1">
-                        <p class="text-sm text-gray-400 mb-1">触发器 (TRIGGER)</p>
-                        <div class="bg-gray-900 p-3 rounded-lg">
-                            <p class="font-mono"><span class="text-cyan-400">${triggerDesc}</span></p>
-                        </div>
-                    </div>
-                    <svg class="w-8 h-8 text-cyan-400 transform lg:rotate-0 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    <div class="flex-1">
-                        <p class="text-sm text-gray-400 mb-1">动作 (ACTION)</p>
-                        <div class="bg-gray-900 p-3 rounded-lg">
-                            <p class="font-mono"><span class="text-purple-400">${actionDesc}</span></p>
-                        </div>
-                    </div>
-                </div>
-            `;
-            workflowList.appendChild(newWorkflowCard);
-            
-            canvas.querySelector('#workflow-svg-layer').innerHTML = '';
-            canvas.querySelectorAll('.canvas-node').forEach(n => n.remove());
-            nodes = [];
-            connections = [];
-            nodeIdCounter = 0;
-            deselectAll();
-            
-            closeModal('workflowEditorModal');
+            // A real implementation would serialize nodes and connections.
             showToast(`工作流 "${workflowName}" 已保存!`);
+            closeModal('workflowEditorModal');
         }
 
         // --- Dashboard Chart Logic ---
@@ -1364,54 +1586,21 @@
                     backgroundColor: gradient,
                     tension: 0.4,
                     fill: true,
-                    pointBackgroundColor: '#00f2ff',
-                    pointBorderColor: '#fff',
-                    pointHoverRadius: 7,
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: '#00f2ff'
                 }, {
                     label: '负面情绪指数',
                     data: [20, 30, 25, 40, 60, 55, 50],
                     borderColor: '#ff00ff',
                     tension: 0.4,
                     fill: false,
-                    pointBackgroundColor: '#ff00ff',
-                    pointBorderColor: '#fff',
-                    pointHoverRadius: 7,
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: '#ff00ff'
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: '#e0e0e0',
-                            font: {
-                                family: "'Noto Sans SC', sans-serif"
-                            }
-                        }
-                    }
-                },
+                plugins: { legend: { labels: { color: '#e0e0e0' } } },
                 scales: {
-                    y: {
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.1)'
-                        },
-                        ticks: {
-                            color: '#e0e0e0'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            color: '#e0e0e0'
-                        }
-                    }
+                    y: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#e0e0e0' } },
+                    x: { grid: { display: false }, ticks: { color: '#e0e0e0' } }
                 }
             }
         });
@@ -1427,14 +1616,10 @@
             {text: '价格', size: 35}, {text: '内饰', size: 32},
         ];
 
-        // 新增: 防抖工具函数，用于延迟函数执行，防止在高频触发（如resize）时造成性能问题
         function debounce(func, wait) {
             let timeout;
             return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
+                const later = () => { clearTimeout(timeout); func(...args); };
                 clearTimeout(timeout);
                 timeout = setTimeout(later, wait);
             };
@@ -1442,47 +1627,29 @@
 
         function renderWordCloud() {
             const container = document.getElementById('wordCloud');
-            if (!container || container.clientWidth === 0 || container.clientHeight === 0) {
-                return;
-            }
+            if (!container || container.clientWidth === 0 || container.clientHeight === 0) return;
 
-            function draw(words) {
-                const svgContainer = d3.select("#wordCloud");
-                svgContainer.selectAll("*").remove(); // 清除旧的SVG，防止重复渲染
-                svgContainer.append("svg")
-                    .attr("width", layout.size()[0])
-                    .attr("height", layout.size()[1])
-                    .append("g")
-                    .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
-                    .selectAll("text")
-                    .data(words)
-                    .enter().append("text")
-                    .style("font-size", d => d.size + "px")
-                    .style("font-family", "Noto Sans SC")
-                    .style("fill", d => d.color || '#00f2ff')
-                    .attr("text-anchor", "middle")
-                    .attr("transform", d => "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")")
-                    .text(d => d.text)
-                    .style("opacity", 0)
-                    .transition()
-                    .duration(1000)
-                    .style("opacity", 1);
-            }
-
+            d3.select("#wordCloud").selectAll("*").remove(); 
             const layout = d3.layout.cloud()
                 .size([container.clientWidth, container.clientHeight])
-                .words(words)
-                .padding(5)
-                .rotate(() => (~~(Math.random() * 6) - 3) * 15)
-                .font('Noto Sans SC')
-                // 修正: 确保布局算法使用的字体大小与最终渲染的大小一致
-                .fontSize(d => d.size)
+                .words(words.map(d => ({...d})))
+                .padding(5).rotate(() => (~~(Math.random() * 6) - 3) * 15)
+                .font('Noto Sans SC').fontSize(d => d.size)
                 .on("end", draw);
-
             layout.start();
+
+            function draw(words) {
+                d3.select("#wordCloud").append("svg")
+                    .attr("width", layout.size()[0]).attr("height", layout.size()[1])
+                    .append("g").attr("transform", `translate(${layout.size()[0] / 2},${layout.size()[1] / 2})`)
+                    .selectAll("text").data(words).enter().append("text")
+                    .style("font-size", d => d.size + "px").style("font-family", "Noto Sans SC")
+                    .style("fill", d => d.color || '#00f2ff').attr("text-anchor", "middle")
+                    .attr("transform", d => `translate(${d.x},${d.y})rotate(${d.rotate})`)
+                    .text(d => d.text).style("opacity", 0).transition().duration(1000).style("opacity", 1);
+            }
         }
         
-        // 新增: 创建一个经过防抖处理的渲染函数
         const debouncedRenderWordCloud = debounce(renderWordCloud, 100);
 
         // Initial setup
@@ -1491,10 +1658,9 @@
             const initialLink = document.querySelector(`.sidebar-item[href="#${initialView}"]`);
             if(initialLink) {
                 switchView(initialView, initialLink);
+            } else {
+                switchView('dashboard', document.querySelector('.sidebar-item'));
             }
-            // 首次渲染
-            renderWordCloud();
-            // 修正: 监听容器尺寸变化时，调用防抖处理过的函数，以获得稳定的尺寸
             new ResizeObserver(debouncedRenderWordCloud).observe(document.getElementById('wordCloud'));
         });
 
