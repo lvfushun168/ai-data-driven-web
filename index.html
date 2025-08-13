@@ -11,9 +11,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-cloud@1.2.5/build/d3.layout.cloud.js"></script>
+    <!-- 引入PrismJS用于代码高亮 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
+    <!-- 引入marked.js用于将Markdown转为HTML -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 
     <style>
         :root {
@@ -98,9 +102,13 @@
             transition: all 0.3s ease;
             box-shadow: 0 0 10px var(--glow-color-primary), 0 0 10px var(--glow-color-secondary);
         }
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 0 15px var(--glow-color-primary), 0 0 15px var(--glow-color-secondary);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .btn-secondary {
@@ -166,6 +174,9 @@
             opacity: 0;
             transform: translateX(100%);
             transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        .toast.error {
+             background: linear-gradient(135deg, #ff6b6b, #ff00ff);
         }
         .toast.show {
             opacity: 1;
@@ -329,6 +340,51 @@
             background: rgba(10, 20, 40, 0.8);
             border: 1px solid var(--border-color);
             border-radius: 0.5rem;
+            white-space: pre-wrap; /* Allow text to wrap */
+            word-break: break-all; /* Break long words */
+        }
+        /* Style for markdown output */
+        .markdown-body {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.3em;
+            margin-top: 24px;
+            margin-bottom: 16px;
+        }
+        .markdown-body p {
+            margin-bottom: 16px;
+        }
+        .markdown-body code {
+            background-color: rgba(10, 20, 40, 0.8);
+            padding: .2em .4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .markdown-body pre {
+            padding: 16px;
+            overflow: auto;
+            line-height: 1.45;
+            border-radius: 6px;
+        }
+        .markdown-body pre code {
+            padding: 0;
+            margin: 0;
+            font-size: 100%;
+        }
+        .markdown-body ul, .markdown-body ol {
+            padding-left: 2em;
+            margin-bottom: 16px;
+        }
+        .markdown-body blockquote {
+            padding: 0 1em;
+            color: #a5b4fc;
+            border-left: 0.25em solid var(--secondary-color);
+            margin-left: 0;
         }
     </style>
 </head>
@@ -352,7 +408,6 @@
                 <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                 <span class="hidden lg:inline">数据源管理</span>
             </a>
-            <!-- MODIFIED: Renamed "Insight Engine" to "Insight Lab" -->
             <a href="#insight-lab" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('insight-lab', this)">
                 <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path></svg>
                 <span class="hidden lg:inline">AI 引擎实验室</span>
@@ -527,7 +582,7 @@
             </div>
         </div>
 
-        <!-- NEW/REDESIGNED View: Insight Lab -->
+        <!-- View: Insight Lab (MODIFIED FOR STREAMING) -->
         <div id="view-insight-lab" class="view-content hidden">
             <header class="mb-8">
                 <h2 class="text-3xl font-bold font-orbitron">AI 引擎实验室</h2>
@@ -545,13 +600,14 @@
                     <h3 class="text-xl font-bold mb-4 neon-text-accent">2. 配置分析引擎</h3>
                     <div id="lab-config-panel" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium mb-1">选择AI能力</label>
-                            <select id="lab-ai-model-select" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2">
+                            <label class="block text-sm font-medium mb-1">选择AI能力 (生成对应指令)</label>
+                            <select id="lab-ai-task-select" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2">
                                 <option value="summary">文本摘要</option>
                                 <option value="todo">任务提取 (ToDo)</option>
                                 <option value="sentiment">情感与意图分析</option>
                                 <option value="ner">命名实体识别 (NER)</option>
                                 <option value="topic">主题建模</option>
+                                <option value="freeform">自由对话</option>
                             </select>
                         </div>
                         <div id="lab-model-params" class="space-y-3 p-3 border border-gray-700 rounded-md">
@@ -567,9 +623,9 @@
 
                 <!-- Output Panel -->
                 <div class="lg:col-span-1 glassmorphism rounded-xl p-4 flex flex-col fade-in-up" style="animation-delay: 0.2s;">
-                    <h3 class="text-xl font-bold mb-4 neon-text-secondary">3. 查看分析结果</h3>
-                    <div id="lab-output-container" class="w-full flex-grow bg-gray-900/50 border border-gray-700 rounded-md p-1 overflow-auto">
-                        <pre><code id="lab-output-json" class="language-json text-sm"></code></pre>
+                    <h3 class="text-xl font-bold mb-4 neon-text-secondary">3. 分析结果</h3>
+                    <div id="lab-output-container" class="w-full flex-grow bg-gray-900/50 border border-gray-700 rounded-md p-3 overflow-auto">
+                        <div id="lab-output-markdown" class="markdown-body"></div>
                     </div>
                 </div>
             </div>
@@ -984,686 +1040,859 @@
     </div>
 
 
-    <script>
-        // --- Core UI Logic ---
-        function switchView(viewId, element) {
-            document.querySelectorAll('.view-content').forEach(view => {
-                view.classList.add('hidden');
-            });
-            document.getElementById('view-' + viewId).classList.remove('hidden');
 
-            document.querySelectorAll('.sidebar-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            element.classList.add('active');
-            
-            const viewContent = document.getElementById('view-' + viewId);
-            const animatedElements = viewContent.querySelectorAll('.fade-in-up');
-            animatedElements.forEach(el => {
-                el.style.animation = 'none';
-                el.offsetHeight; /* trigger reflow */
-                el.style.animation = null; 
-            });
+<script>
+    // --- Core UI Logic ---
+    function switchView(viewId, element) {
+        document.querySelectorAll('.view-content').forEach(view => {
+            view.classList.add('hidden');
+        });
+        document.getElementById('view-' + viewId).classList.remove('hidden');
 
-            if (viewId === 'dashboard') {
-                debouncedRenderWordCloud();
-            }
-            if (viewId === 'insight-lab') {
-                initLab();
-            }
-        }
-
-        function showToast(message) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.classList.add('show');
-            }, 100);
-
-            setTimeout(() => {
-                toast.classList.remove('show');
-                toast.addEventListener('transitionend', () => {
-                    if (toast.parentNode) {
-                        toast.remove();
-                    }
-                });
-            }, 3000);
-        }
-
-        // --- Modal Logic ---
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if(modal) modal.classList.add('active');
-        }
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if(modal) modal.classList.remove('active');
-            if(modalId === 'addDataSourceModal') {
-                document.getElementById('addDataSourceForm').reset();
-            }
-        }
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', (event) => {
-                if (event.target === modal) {
-                    closeModal(modal.id);
-                }
-            });
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        element.classList.add('active');
+        
+        const viewContent = document.getElementById('view-' + viewId);
+        const animatedElements = viewContent.querySelectorAll('.fade-in-up');
+        animatedElements.forEach(el => {
+            el.style.animation = 'none';
+            el.offsetHeight; /* trigger reflow */
+            el.style.animation = null; 
         });
 
-        // --- Add Data Source Logic ---
-        function addDataSource() {
-            const form = document.getElementById('addDataSourceForm');
-            const sourceName = form.sourceName.value;
-            const sourceType = form.sourceType.value;
-            const sourceDesc = form.sourceDesc.value;
-
-            if (!sourceName) {
-                showToast('错误：数据源名称不能为空');
-                return;
-            }
-
-            const grid = document.getElementById('data-source-grid');
-            const newCard = document.createElement('div');
-            newCard.className = 'glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up';
-            const iconSvg = `<svg class="w-16 h-16 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>`;
-
-            newCard.innerHTML = `
-                ${iconSvg}
-                <h3 class="text-xl font-bold">${sourceName}</h3>
-                <p class="text-sm text-cyan-400 font-bold my-2">${sourceType}</p>
-                <p class="text-xs text-gray-400 flex-grow">${sourceDesc || '暂无描述'}</p>
-                <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
-            `;
-            
-            grid.appendChild(newCard);
-            closeModal('addDataSourceModal');
-            showToast(`数据源 "${sourceName}" 添加成功！`);
+        if (viewId === 'dashboard') {
+            debouncedRenderWordCloud();
         }
-        
-        // --- (NEW) Insight Lab Logic ---
-        const labModelSelect = document.getElementById('lab-ai-model-select');
-        const labParamsContainer = document.getElementById('lab-model-params');
-        const labOutputCode = document.getElementById('lab-output-json');
-        const labInputText = document.getElementById('lab-input-text');
-        const labRunButton = document.getElementById('lab-run-button');
+        if (viewId === 'insight-lab') {
+            initLab();
+        }
+    }
 
-        const labModelConfigs = {
-            summary: {
-                name: '文本摘要',
-                params: [
-                    { id: 'summary-type', label: '摘要类型', type: 'select', options: ['通用摘要', '上下文感知摘要', '角色化摘要(管理者)', '角色化摘要(执行者)'] },
-                    { id: 'summary-length', label: '摘要长度', type: 'select', options: ['简短', '中等', '详细'] }
-                ],
-                mockOutput: (text) => ({
-                    summary: `这是关于“${text.substring(0,15)}...”的【${document.getElementById('summary-length')?.value}】摘要。模型类型为【${document.getElementById('summary-type')?.value}】。`,
-                    keywords: ["核心词A", "核心词B", "核心词C"]
-                })
-            },
-            todo: {
-                name: '任务提取 (ToDo)',
-                params: [
-                    { id: 'todo-mode', label: '提取模式', type: 'select', options: ['智能提取', '仅提取明确任务'] }
-                ],
-                mockOutput: () => ({
-                    tasks: [
-                        { task: "完成渲染引擎优化", assignee: "张伟", due_date: "下周三", status: "pending" },
-                        { task: "确认芯片到货日期", assignee: "供应链", due_date: null, status: "pending" }
-                    ]
-                })
-            },
-            sentiment: {
-                name: '情感与意图分析',
-                params: [
-                    { id: 'sentiment-granularity', label: '分析粒度', type: 'select', options: ['细粒度情感+意图', '通用情感(正/中/负)'] }
-                ],
-                mockOutput: () => ({
-                    sentiment: "Negative",
-                    score: -0.85,
-                    emotion: "Complaint",
-                    intents: ["产品槽点", "功能缺陷"]
-                })
-            },
-            ner: {
-                name: '命名实体识别 (NER)',
-                params: [
-                    { id: 'ner-types', label: '自定义实体 (逗号分隔)', type: 'text', placeholder: 'BUG编号, 项目代号' }
-                ],
-                mockOutput: () => ({
-                    entities: [
-                        { text: "张伟", type: "PERSON", start: 50, end: 52 },
-                        { text: "渲染引擎", type: "PRODUCT", start: 60, end: 64 },
-                        { text: "NE-900", type: "竞品车型", start: 120, end: 126 }
-                    ]
-                })
-            },
-            topic: {
-                name: '主题建模',
-                params: [],
-                mockOutput: () => ({
-                    topics: [
-                        { topic: "电池与续航", score: 0.65, keywords: ["电池", "续航", "OTA", "提升"] },
-                        { topic: "车机系统", score: 0.25, keywords: ["车机", "卡顿", "抱怨", "升级"] },
-                        { topic: "智能驾驶", score: 0.10, keywords: ["辅助驾驶", "雨天", "表现", "KOL"] }
-                    ]
-                })
-            }
-        };
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        if (type === 'error') {
+            toast.classList.add('error');
+        }
+        toast.textContent = message;
+        container.appendChild(toast);
 
-        function renderLabParams() {
-            const selectedModel = labModelSelect.value;
-            const config = labModelConfigs[selectedModel];
-            labParamsContainer.innerHTML = `<h4 class="font-bold text-sm mb-2">${config.name} 参数</h4>`;
-            if (config.params.length === 0) {
-                labParamsContainer.innerHTML += `<p class="text-xs text-gray-500">该模型没有可配置参数。</p>`;
-            }
-            config.params.forEach(param => {
-                let inputHtml = '';
-                if (param.type === 'select') {
-                    inputHtml = `<select id="${param.id}" class="w-full bg-gray-700 border border-gray-600 rounded-md p-1.5 text-sm">
-                        ${param.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
-                    </select>`;
-                } else if (param.type === 'text') {
-                    inputHtml = `<input type="text" id="${param.id}" placeholder="${param.placeholder || ''}" class="w-full bg-gray-700 border border-gray-600 rounded-md p-1.5 text-sm">`;
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            toast.addEventListener('transitionend', () => {
+                if (toast.parentNode) {
+                    toast.remove();
                 }
-                labParamsContainer.innerHTML += `
-                    <div>
-                        <label for="${param.id}" class="block text-xs font-medium mb-1">${param.label}</label>
-                        ${inputHtml}
-                    </div>
-                `;
             });
-        }
+        }, 4000);
+    }
 
-        function runLabAnalysis() {
-            const text = labInputText.value;
-            if (!text.trim()) {
-                showToast("请输入需要分析的文本");
-                return;
+    // --- Modal Logic ---
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if(modal) modal.classList.add('active');
+    }
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if(modal) modal.classList.remove('active');
+        if(modalId === 'addDataSourceModal') {
+            document.getElementById('addDataSourceForm').reset();
+        }
+    }
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeModal(modal.id);
             }
-            
-            labRunButton.textContent = "分析中...";
-            labRunButton.disabled = true;
+        });
+    });
 
-            setTimeout(() => {
-                const selectedModel = labModelSelect.value;
-                const mockOutput = labModelConfigs[selectedModel].mockOutput(text);
-                const jsonString = JSON.stringify(mockOutput, null, 2);
-                
-                labOutputCode.textContent = jsonString;
-                Prism.highlightElement(labOutputCode);
-                
-                labRunButton.textContent = "运行分析";
-                labRunButton.disabled = false;
-                showToast("分析完成！");
-            }, 1000); // Simulate API call
+    // --- Add Data Source Logic ---
+    function addDataSource() {
+        const form = document.getElementById('addDataSourceForm');
+        const sourceName = form.sourceName.value;
+        const sourceType = form.sourceType.value;
+        const sourceDesc = form.sourceDesc.value;
+
+        if (!sourceName) {
+            showToast('错误：数据源名称不能为空', 'error');
+            return;
         }
 
-        function initLab() {
-            renderLabParams();
-            labOutputCode.textContent = JSON.stringify({ message: "结果将在此处显示..." }, null, 2);
-            Prism.highlightElement(labOutputCode);
+        const grid = document.getElementById('data-source-grid');
+        const newCard = document.createElement('div');
+        newCard.className = 'glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up';
+        const iconSvg = `<svg class="w-16 h-16 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>`;
+
+        newCard.innerHTML = `
+            ${iconSvg}
+            <h3 class="text-xl font-bold">${sourceName}</h3>
+            <p class="text-sm text-cyan-400 font-bold my-2">${sourceType}</p>
+            <p class="text-xs text-gray-400 flex-grow">${sourceDesc || '暂无描述'}</p>
+            <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
+        `;
+        
+        grid.appendChild(newCard);
+        closeModal('addDataSourceModal');
+        showToast(`数据源 "${sourceName}" 添加成功！`);
+    }
+    
+    // --- Insight Lab Logic (MODIFIED FOR STREAMING API) ---
+    const labTaskSelect = document.getElementById('lab-ai-task-select');
+    const labParamsContainer = document.getElementById('lab-model-params');
+    const labOutputMarkdown = document.getElementById('lab-output-markdown');
+    const labInputText = document.getElementById('lab-input-text');
+    const labRunButton = document.getElementById('lab-run-button');
+
+    // 定义不同AI能力对应的系统指令 (System Prompt)
+    const labTaskPrompts = {
+        summary: {
+            name: '文本摘要',
+            prompt: '你是一个专业的文本摘要引擎。请根据用户提供的文本，生成一份清晰、简洁、准确的markdown格式摘要。',
+            params: [
+                { id: 'summary-length', label: '摘要长度', type: 'select', options: ['简短', '中等', '详细'] }
+            ]
+        },
+        todo: {
+            name: '任务提取 (ToDo)',
+            prompt: '你是一个任务提取专家。请从以下文本中识别出所有的待办事项、任务、行动点。请以清晰的列表形式返回，并尽可能包含负责人和截止日期。',
+            params: []
+        },
+        sentiment: {
+            name: '情感与意图分析',
+            prompt: '你是一个情感分析和意图识别机器人。请分析给定文本的情感（如：正面、负面、中性）和用户的主要意图（如：咨询、投诉、建议、赞扬）。请以结构化的方式返回分析结果。',
+            params: []
+        },
+        ner: {
+            name: '命名实体识别 (NER)',
+            prompt: '你是一个命名实体识别(NER)工具。请从文本中提取出指定类型的实体，例如人名(PER)、地名(LOC)、组织机构名(ORG)、产品名(PROD)等。请以JSON格式返回结果。',
+            params: [
+                 { id: 'ner-types', label: '自定义实体 (逗号分隔)', type: 'text', placeholder: 'BUG编号, 项目代号' }
+            ]
+        },
+        topic: {
+            name: '主题建模',
+            prompt: '你是一个主题建模分析器。请分析给定文本，识别出其中包含的核心主题，并给出每个主题的关键词和权重。',
+            params: []
+        },
+        freeform: {
+            name: '自由对话',
+            prompt: '你是一个通用的人工智能助手。',
+            params: []
         }
+    };
 
-        labModelSelect.addEventListener('change', renderLabParams);
-
-
-        // --- Action Center Logic ---
-        function toggleWorkflowStatus(checkbox, workflowName) {
-            const card = checkbox.closest('.glassmorphism');
-            const statusText = card.querySelector('.text-xs.font-bold');
-            if (checkbox.checked) {
-                statusText.textContent = '● 运行中';
-                statusText.className = 'text-xs font-bold text-green-400';
-                card.classList.remove('opacity-70');
-                showToast(`工作流 "${workflowName}" 已激活`);
-            } else {
-                statusText.textContent = '● 已暂停';
-                statusText.className = 'text-xs font-bold text-gray-500';
-                card.classList.add('opacity-70');
-                showToast(`工作流 "${workflowName}" 已暂停`);
+    function renderLabParams() {
+        const selectedTask = labTaskSelect.value;
+        const config = labTaskPrompts[selectedTask];
+        labParamsContainer.innerHTML = `<h4 class="font-bold text-sm mb-2">${config.name} 参数</h4>`;
+        if (config.params.length === 0) {
+            labParamsContainer.innerHTML += `<p class="text-xs text-gray-500">该能力没有可配置参数。</p>`;
+        }
+        config.params.forEach(param => {
+            let inputHtml = '';
+            if (param.type === 'select') {
+                inputHtml = `<select id="${param.id}" class="w-full bg-gray-700 border border-gray-600 rounded-md p-1.5 text-sm">
+                    ${param.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                </select>`;
+            } else if (param.type === 'text') {
+                inputHtml = `<input type="text" id="${param.id}" placeholder="${param.placeholder || ''}" class="w-full bg-gray-700 border border-gray-600 rounded-md p-1.5 text-sm">`;
             }
+            labParamsContainer.innerHTML += `
+                <div>
+                    <label for="${param.id}" class="block text-xs font-medium mb-1">${param.label}</label>
+                    ${inputHtml}
+                </div>
+            `;
+        });
+    }
+
+    async function runLabAnalysis() {
+        const text = labInputText.value;
+        if (!text.trim()) {
+            showToast("请输入需要分析的文本", "error");
+            return;
         }
         
-        const mockLogs = {
-            '舆情告警工作流': [
-                { time: '2025-08-12 16:55:01', status: '成功', message: '触发成功。检测到关键词“失控”，情感“强烈负面”。已在钉钉创建ID为#1024的高优工单并@公关部负责人。' },
-            ],
-            '项目进度跟进工作流': [
-                { time: '2025-08-12 17:00:15', status: '成功', message: '任务 [完成渲染引擎优化] 还有24小时到期，已在 [F3项目交付冲刺群] @张伟 和 @项目经理。' },
-                { time: '2025-08-12 16:48:02', status: '失败', message: '任务 [确认供应链芯片到货日期] 提醒失败。原因: 找不到任务负责人 [李四]，请在任务中心手动指定。' },
-            ],
-        };
+        labRunButton.textContent = "分析中...";
+        labRunButton.disabled = true;
+        labOutputMarkdown.innerHTML = ''; // 清空上次结果
 
-        function openLogModal(workflowName) {
-            document.getElementById('logModalWorkflowName').textContent = workflowName;
-            const logBody = document.getElementById('log-table-body');
-            logBody.innerHTML = ''; // Clear previous logs
+        // --- API 配置 ---
+        const apiUrl = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+        const apiKey = 'sk-6***********';
+        const model = 'qwen-plus-2025-07-28';
 
-            const logs = mockLogs[workflowName] || [{ time: new Date().toLocaleString(), status: '信息', message: '暂无该工作流的执行日志。' }];
-            
-            logs.forEach(log => {
-                const row = document.createElement('tr');
-                const statusClass = log.status === '成功' ? 'text-green-400' : (log.status === '失败' ? 'text-red-400' : 'text-gray-400');
-                row.className = 'border-b border-gray-800 hover:bg-gray-800/50';
-                row.innerHTML = `
-                    <td class="p-2 font-mono">${log.time}</td>
-                    <td class="p-2 font-bold ${statusClass}">${log.status}</td>
-                    <td class="p-2 text-gray-300">${log.message}</td>
-                `;
-                logBody.appendChild(row);
+        const selectedTask = labTaskSelect.value;
+        const systemPrompt = labTaskPrompts[selectedTask].prompt;
+        
+        // 组合最终的用户输入
+        let userContent = text;
+        if (selectedTask === 'summary') {
+            const length = document.getElementById('summary-length')?.value || '中等';
+            userContent = `请为以下文本生成一份【${length}】长度的摘要：\n\n${text}`;
+        }
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: model,
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: userContent }
+                    ],
+                    stream: true // 开启流式输出
+                })
             });
 
-            openModal('workflowLogModal');
-        }
-
-
-        // --- Workflow Editor Logic ---
-        const canvas = document.getElementById('workflow-canvas');
-        const svgLayer = document.getElementById('workflow-svg-layer');
-        const propertiesPanel = document.getElementById('properties-panel');
-        const propertiesContent = document.getElementById('properties-content');
-
-        let nodes = [];
-        let connections = [];
-        let nodeIdCounter = 0;
-        let selectedElement = null;
-        let isDraggingNode = false;
-        let dragOffsetX, dragOffsetY;
-        let tempLine = null;
-        let startConnector = null;
-
-        const nodeConfigs = {
-            'trigger-source': { title: '数据源输入', colorClass: 'text-cyan-300', borderColor: 'border-cyan-400', properties: { source: 'dingtalk-group-1' } },
-            'trigger-schedule': { title: '定时触发', colorClass: 'text-cyan-300', borderColor: 'border-cyan-400', properties: { cron: '0 0 * * *' } },
-            'ai-summary': { title: '文本摘要', colorClass: 'text-accent-color', borderColor: 'border-accent-color', properties: { type: '通用摘要', length: '中等' } },
-            'ai-todo': { title: '任务提取', colorClass: 'text-accent-color', borderColor: 'border-accent-color', properties: { mode: '智能提取' } },
-            'ai-sentiment': { title: '情感分析', colorClass: 'text-accent-color', borderColor: 'border-accent-color', properties: { granularity: '细粒度情感+意图' } },
-            'ai-ner': { title: '实体识别', colorClass: 'text-accent-color', borderColor: 'border-accent-color', properties: { customTypes: 'BUG编号, 项目代号' } },
-            'action-notify': { title: '发送钉钉通知', colorClass: 'text-purple-300', borderColor: 'border-purple-400', properties: { channel: '#general', message: '来自OASIS的通知: {{input.summary}}' } },
-            'action-todo': { title: '创建待办事项', colorClass: 'text-purple-300', borderColor: 'border-purple-400', properties: { title: '{{input.task}}', assignee: '{{input.assignee}}' } },
-            'action-webhook': { title: '调用 Webhook', colorClass: 'text-purple-300', borderColor: 'border-purple-400', properties: { url: 'https://api.example.com/hook', payload: '{{input}}' } },
-        };
-
-        function handleDragStart(event, nodeType) {
-            event.dataTransfer.setData('node-type', nodeType);
-        }
-
-        function handleDragOver(event) {
-            event.preventDefault();
-        }
-
-        function handleDrop(event) {
-            event.preventDefault();
-            const nodeType = event.dataTransfer.getData('node-type');
-            if (nodeType) {
-                const rect = canvas.getBoundingClientRect();
-                const x = event.clientX - rect.left;
-                const y = event.clientY - rect.top;
-                createNode(nodeType, x, y);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorData.error.message}`);
             }
-        }
 
-        function createNode(type, x, y) {
-            const nodeId = `node-${nodeIdCounter++}`;
-            const config = nodeConfigs[type];
-            const nodeData = { id: nodeId, type, x, y, properties: { ...config.properties } };
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+            let fullResponse = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    break;
+                }
+                
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n').filter(line => line.trim() !== '');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.substring(6);
+                        if (data === '[DONE]') {
+                            break;
+                        }
+                        try {
+                            const json = JSON.parse(data);
+                            const content = json.choices[0]?.delta?.content || '';
+                            if (content) {
+                                fullResponse += content;
+                                // 使用marked.js将Markdown实时转为HTML并显示
+                                labOutputMarkdown.innerHTML = marked.parse(fullResponse);
+                                // 滚动到底部
+                                labOutputMarkdown.parentElement.scrollTop = labOutputMarkdown.parentElement.scrollHeight;
+                            }
+                        } catch (e) {
+                            console.error("Error parsing stream JSON:", e, "Data chunk:", data);
+                        }
+                    }
+                }
+            }
+            showToast("分析完成！");
+
+        } catch (error) {
+            console.error("Fetch Error:", error);
+            labOutputMarkdown.innerHTML = `<p class="text-red-400"><strong>请求失败:</strong> ${error.message}</p>`;
+            showToast(`请求失败: ${error.message}`, "error");
+        } finally {
+            labRunButton.textContent = "运行分析";
+            labRunButton.disabled = false;
+        }
+    }
+
+    function initLab() {
+        renderLabParams();
+        labOutputMarkdown.innerHTML = '<p class="text-gray-500">结果将在此处显示...</p>';
+    }
+
+    labTaskSelect.addEventListener('change', renderLabParams);
+
+
+    // --- Action Center Logic ---
+    function toggleWorkflowStatus(checkbox, workflowName) {
+        const card = checkbox.closest('.glassmorphism');
+        const statusText = card.querySelector('.text-xs.font-bold');
+        if (checkbox.checked) {
+            statusText.textContent = '● 运行中';
+            statusText.className = 'text-xs font-bold text-green-400';
+            card.classList.remove('opacity-70');
+            showToast(`工作流 "${workflowName}" 已激活`);
+        } else {
+            statusText.textContent = '● 已暂停';
+            statusText.className = 'text-xs font-bold text-gray-500';
+            card.classList.add('opacity-70');
+            showToast(`工作流 "${workflowName}" 已暂停`);
+        }
+    }
+    
+    // ==================== 删除工作流 ====================
+    // 此函数用于删除工作流卡片。
+    function deleteWorkflow(button) {
+        // 找到要删除的卡片元素
+        const card = button.closest('.glassmorphism');
+        if (card) {
+            // 添加一个简单的动画效果
+            card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            card.style.opacity = '0';
+            card.style.transform = 'translateX(-50px)';
+            // 在动画结束后移除元素
+            setTimeout(() => {
+                card.remove();
+                showToast('工作流已删除');
+            }, 300);
+        }
+    }
+    // ==========================================================
+
+    const mockLogs = {
+        '舆情告警工作流': [
+            { time: '2025-08-12 16:55:01', status: '成功', message: '触发成功。检测到关键词“失控”，情感“强烈负面”。已在钉钉创建ID为#1024的高优工单并@公关部负责人。' },
+        ],
+        '项目进度跟进工作流': [
+            { time: '2025-08-12 17:00:15', status: '成功', message: '任务 [完成渲染引擎优化] 还有24小时到期，已在 [F3项目交付冲刺群] @张伟 和 @项目经理。' },
+            { time: '2025-08-12 16:48:02', status: '失败', message: '任务 [确认供应链芯片到货日期] 提醒失败。原因: 找不到任务负责人 [李四]，请在任务中心手动指定。' },
+        ],
+    };
+
+    function openLogModal(workflowName) {
+        document.getElementById('logModalWorkflowName').textContent = workflowName;
+        const logBody = document.getElementById('log-table-body');
+        logBody.innerHTML = ''; // Clear previous logs
+
+        const logs = mockLogs[workflowName] || [{ time: new Date().toLocaleString(), status: '信息', message: '暂无该工作流的执行日志。' }];
+        
+        logs.forEach(log => {
+            const row = document.createElement('tr');
+            const statusClass = log.status === '成功' ? 'text-green-400' : (log.status === '失败' ? 'text-red-400' : 'text-gray-400');
+            row.className = 'border-b border-gray-800 hover:bg-gray-800/50';
+            row.innerHTML = `
+                <td class="p-2 font-mono">${log.time}</td>
+                <td class="p-2 font-bold ${statusClass}">${log.status}</td>
+                <td class="p-2 text-gray-300">${log.message}</td>
+            `;
+            logBody.appendChild(row);
+        });
+
+        openModal('workflowLogModal');
+    }
+
+
+    // --- Workflow Editor Logic ---
+    const canvas = document.getElementById('workflow-canvas');
+    let svgLayer = document.getElementById('workflow-svg-layer'); // 让其可被重新赋值
+    const propertiesPanel = document.getElementById('properties-panel');
+    const propertiesContent = document.getElementById('properties-content');
+
+    let nodes = [];
+    let connections = [];
+    let nodeIdCounter = 0;
+    let selectedElement = null;
+    let isDraggingNode = false;
+    let dragOffsetX, dragOffsetY;
+    let tempLine = null;
+    let startConnector = null;
+
+    const nodeConfigs = {
+        'trigger-source': { title: '数据源输入', colorClass: 'text-cyan-300', borderColor: 'border-cyan-400', properties: { source: 'dingtalk-group-1' } },
+        'trigger-schedule': { title: '定时触发', colorClass: 'text-cyan-300', borderColor: 'border-cyan-400', properties: { cron: '0 0 * * *' } },
+        'ai-summary': { title: '文本摘要', colorClass: 'text-accent-color', borderColor: 'border-accent-color', properties: { type: '通用摘要', length: '中等' } },
+        'ai-todo': { title: '任务提取', colorClass: 'text-accent-color', borderColor: 'border-accent-color', properties: { mode: '智能提取' } },
+        'ai-sentiment': { title: '情感分析', colorClass: 'text-accent-color', borderColor: 'border-accent-color', properties: { granularity: '细粒度情感+意图' } },
+        'ai-ner': { title: '实体识别', colorClass: 'text-accent-color', borderColor: 'border-accent-color', properties: { customTypes: 'BUG编号, 项目代号' } },
+        'action-notify': { title: '发送钉钉通知', colorClass: 'text-purple-300', borderColor: 'border-purple-400', properties: { channel: '#general', message: '来自OASIS的通知: {{input.summary}}' } },
+        'action-todo': { title: '创建待办事项', colorClass: 'text-purple-300', borderColor: 'border-purple-400', properties: { title: '{{input.task}}', assignee: '{{input.assignee}}' } },
+        'action-webhook': { title: '调用 Webhook', colorClass: 'text-purple-300', borderColor: 'border-purple-400', properties: { url: 'https://api.example.com/hook', payload: '{{input}}' } },
+    };
+
+    function handleDragStart(event, nodeType) {
+        event.dataTransfer.setData('node-type', nodeType);
+    }
+
+    function handleDragOver(event) {
+        event.preventDefault();
+    }
+
+    function handleDrop(event) {
+        event.preventDefault();
+        const nodeType = event.dataTransfer.getData('node-type');
+        if (nodeType) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            createNode(nodeType, x, y);
+        }
+    }
+
+    function createNode(type, x, y) {
+        const nodeId = `node-${nodeIdCounter++}`;
+        const config = nodeConfigs[type];
+        const nodeData = { id: nodeId, type, x, y, properties: { ...config.properties } };
+        
+        const nodeElement = document.createElement('div');
+        nodeElement.id = nodeId;
+        nodeElement.className = 'canvas-node glassmorphism p-3 rounded-lg w-52';
+        nodeElement.style.left = `${x}px`;
+        nodeElement.style.top = `${y}px`;
+        
+        nodeElement.innerHTML = `
+            <p class="font-bold text-sm ${config.colorClass}">${config.title}</p>
+            <p id="desc-${nodeId}" class="text-xs text-gray-400">未配置</p>
+            <div class="node-connector output" data-node-id="${nodeId}" data-connector-type="output"></div>
+            <div class="node-connector input" data-node-id="${nodeId}" data-connector-type="input"></div>
+        `;
+        nodeElement.classList.add(config.borderColor, 'border-l-4');
+
+        nodeElement.addEventListener('mousedown', startDragNode);
+        nodeElement.addEventListener('click', (e) => { e.stopPropagation(); selectElement(nodeData); });
+        canvas.appendChild(nodeElement);
+        nodes.push(nodeData);
+        updateNodeDescription(nodeData);
+    }
+
+    function selectElement(elementData) {
+        deselectAll(); 
+        selectedElement = elementData;
+        if(elementData.id) { // It's a node
+            document.getElementById(elementData.id).classList.add('selected');
+            propertiesPanel.classList.remove('hidden');
+            renderProperties(elementData);
+        } else { // It's a connection
+            updateConnections();
+        }
+    }
+    
+    function deselectAll(event) {
+        if (event && event.target !== canvas && !event.target.closest('svg')) {
+            return;
+        }
+        
+        if (selectedElement) {
+            if(selectedElement.id) { // Node
+                document.getElementById(selectedElement.id)?.classList.remove('selected');
+            }
+            selectedElement = null;
+            propertiesPanel.classList.add('hidden');
+            updateConnections();
+        }
+    }
+
+    function startDragNode(e) {
+        if (e.target.classList.contains('node-connector')) return;
+        e.preventDefault();
+        const nodeElement = e.currentTarget;
+        
+        const nodeData = nodes.find(n => n.id === nodeElement.id);
+        if (!nodeData) return;
+
+        selectElement(nodeData); 
+        isDraggingNode = true;
+        
+        dragOffsetX = e.clientX - nodeElement.offsetLeft;
+        dragOffsetY = e.clientY - nodeElement.offsetTop;
+        
+        document.onmousemove = (moveEvent) => {
+            if (!isDraggingNode) return;
             
-            const nodeElement = document.createElement('div');
-            nodeElement.id = nodeId;
-            nodeElement.className = 'canvas-node glassmorphism p-3 rounded-lg w-52';
+            let x = moveEvent.clientX - dragOffsetX;
+            let y = moveEvent.clientY - dragOffsetY;
+            
+            x = Math.max(0, Math.min(x, canvas.clientWidth - nodeElement.offsetWidth));
+            y = Math.max(0, Math.min(y, canvas.clientHeight - nodeElement.offsetHeight));
+
             nodeElement.style.left = `${x}px`;
             nodeElement.style.top = `${y}px`;
             
-            nodeElement.innerHTML = `
-                <p class="font-bold text-sm ${config.colorClass}">${config.title}</p>
-                <p id="desc-${nodeId}" class="text-xs text-gray-400">未配置</p>
-                <div class="node-connector output" data-node-id="${nodeId}" data-connector-type="output"></div>
-                <div class="node-connector input" data-node-id="${nodeId}" data-connector-type="input"></div>
-            `;
-            nodeElement.classList.add(config.borderColor, 'border-l-4');
-
-            nodeElement.addEventListener('mousedown', startDragNode);
-            nodeElement.addEventListener('click', (e) => { e.stopPropagation(); selectElement(nodeData); });
-            canvas.appendChild(nodeElement);
-            nodes.push(nodeData);
-            updateNodeDescription(nodeData);
-        }
-
-        function selectElement(elementData) {
-            deselectAll(); 
-            selectedElement = elementData;
-            if(elementData.id) { // It's a node
-                document.getElementById(elementData.id).classList.add('selected');
-                propertiesPanel.classList.remove('hidden');
-                renderProperties(elementData);
-            } else { // It's a connection
-                updateConnections();
-            }
-        }
+            nodeData.x = x;
+            nodeData.y = y;
+            
+            updateConnections();
+        };
         
-        function deselectAll(event) {
-            if (event && event.target !== canvas && !event.target.closest('svg')) {
-                return;
-            }
-            
-            if (selectedElement) {
-                if(selectedElement.id) { // Node
-                    document.getElementById(selectedElement.id)?.classList.remove('selected');
-                }
-                selectedElement = null;
-                propertiesPanel.classList.add('hidden');
-                updateConnections();
+        document.onmouseup = () => {
+            isDraggingNode = false;
+            document.onmousemove = null;
+            document.onmouseup = null;
+        };
+    }
+
+    function renderProperties(nodeData) {
+        let formHtml = `<p class="mb-4 text-sm">正在配置: <span class="font-bold">${nodeData.id}</span></p>`;
+        for (const key in nodeData.properties) {
+            const value = nodeData.properties[key];
+            // A more robust solution would use a schema to define input types
+            let inputType = 'text';
+            if (key.includes('payload') || key.includes('message')) {
+                formHtml += `
+                    <div class="mb-3">
+                        <label class="block text-xs font-medium text-gray-400 mb-1">${key}</label>
+                        <textarea data-property="${key}" rows="3" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-sm resize-none">${value}</textarea>
+                    </div>
+                `;
+            } else {
+                 formHtml += `
+                    <div class="mb-3">
+                        <label class="block text-xs font-medium text-gray-400 mb-1">${key}</label>
+                        <input type="text" data-property="${key}" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-sm" value="${value}">
+                    </div>
+                `;
             }
         }
-
-        function startDragNode(e) {
-            if (e.target.classList.contains('node-connector')) return;
-            e.preventDefault();
-            const nodeElement = e.currentTarget;
-            
-            const nodeData = nodes.find(n => n.id === nodeElement.id);
-            if (!nodeData) return;
-
-            selectElement(nodeData); 
-            isDraggingNode = true;
-            
-            dragOffsetX = e.clientX - nodeElement.offsetLeft;
-            dragOffsetY = e.clientY - nodeElement.offsetTop;
-            
-            document.onmousemove = (moveEvent) => {
-                if (!isDraggingNode) return;
-                
-                let x = moveEvent.clientX - dragOffsetX;
-                let y = moveEvent.clientY - dragOffsetY;
-                
-                x = Math.max(0, Math.min(x, canvas.clientWidth - nodeElement.offsetWidth));
-                y = Math.max(0, Math.min(y, canvas.clientHeight - nodeElement.offsetHeight));
-
-                nodeElement.style.left = `${x}px`;
-                nodeElement.style.top = `${y}px`;
-                
-                nodeData.x = x;
-                nodeData.y = y;
-                
-                updateConnections();
-            };
-            
-            document.onmouseup = () => {
-                isDraggingNode = false;
-                document.onmousemove = null;
-                document.onmouseup = null;
-            };
-        }
-
-        function renderProperties(nodeData) {
-            let formHtml = `<p class="mb-4 text-sm">正在配置: <span class="font-bold">${nodeData.id}</span></p>`;
-            for (const key in nodeData.properties) {
-                const value = nodeData.properties[key];
-                // A more robust solution would use a schema to define input types
-                let inputType = 'text';
-                if (key.includes('payload') || key.includes('message')) {
-                    formHtml += `
-                        <div class="mb-3">
-                            <label class="block text-xs font-medium text-gray-400 mb-1">${key}</label>
-                            <textarea data-property="${key}" rows="3" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-sm resize-none">${value}</textarea>
-                        </div>
-                    `;
-                } else {
-                     formHtml += `
-                        <div class="mb-3">
-                            <label class="block text-xs font-medium text-gray-400 mb-1">${key}</label>
-                            <input type="text" data-property="${key}" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-sm" value="${value}">
-                        </div>
-                    `;
-                }
-            }
-            propertiesContent.innerHTML = formHtml;
-            propertiesContent.querySelectorAll('input, textarea').forEach(input => {
-                input.addEventListener('input', (e) => {
-                    nodeData.properties[e.target.dataset.property] = e.target.value;
-                    updateNodeDescription(nodeData);
-                });
+        propertiesContent.innerHTML = formHtml;
+        propertiesContent.querySelectorAll('input, textarea').forEach(input => {
+            input.addEventListener('input', (e) => {
+                nodeData.properties[e.target.dataset.property] = e.target.value;
+                updateNodeDescription(nodeData);
             });
-        }
-        
-        function updateNodeDescription(nodeData) {
-            const descElement = document.getElementById(`desc-${nodeData.id}`);
-            const firstPropValue = Object.values(nodeData.properties)[0];
-            let descText = `${firstPropValue}`.substring(0, 20) + (`${firstPropValue}`.length > 20 ? '...' : '');
-            descElement.textContent = descText || '已配置';
-        }
-
-        canvas.addEventListener('mousedown', (e) => {
-            if (e.target.classList.contains('node-connector')) {
-                startConnector = e.target;
-                e.stopPropagation();
-                
-                tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                tempLine.setAttribute('stroke-dasharray', '5,5');
-                svgLayer.appendChild(tempLine);
-
-                document.addEventListener('mousemove', drawTempLine);
-                document.addEventListener('mouseup', endConnection);
-            }
         });
+    }
+    
+    function updateNodeDescription(nodeData) {
+        const descElement = document.getElementById(`desc-${nodeData.id}`);
+        const firstPropValue = Object.values(nodeData.properties)[0];
+        let descText = `${firstPropValue}`.substring(0, 20) + (`${firstPropValue}`.length > 20 ? '...' : '');
+        descElement.textContent = descText || '已配置';
+    }
 
-        function drawTempLine(e) {
-            if (!startConnector) return;
-            const startRect = startConnector.getBoundingClientRect();
-            const canvasRect = canvas.getBoundingClientRect();
-            const startX = startRect.left + startRect.width / 2 - canvasRect.left;
-            const startY = startRect.top + startRect.height / 2 - canvasRect.top;
-            const endX = e.clientX - canvasRect.left;
-            const endY = e.clientY - canvasRect.top;
-            const d = `M ${startX} ${startY} C ${startX + 70} ${startY}, ${endX - 70} ${endY}, ${endX} ${endY}`;
-            tempLine.setAttribute('d', d);
+    canvas.addEventListener('mousedown', (e) => {
+        if (e.target.classList.contains('node-connector')) {
+            startConnector = e.target;
+            e.stopPropagation();
+            
+            tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            tempLine.setAttribute('stroke-dasharray', '5,5');
+            svgLayer.appendChild(tempLine);
+
+            document.addEventListener('mousemove', drawTempLine);
+            document.addEventListener('mouseup', endConnection);
         }
+    });
 
-        function endConnection(e) {
-            if (tempLine) {
-                tempLine.remove();
-                tempLine = null;
-            }
-            const endConnector = e.target.closest('.node-connector');
-            if (endConnector && endConnector !== startConnector) {
-                const startNodeId = startConnector.dataset.nodeId;
-                const endNodeId = endConnector.dataset.nodeId;
-                const startType = startConnector.dataset.connectorType;
-                const endType = endConnector.dataset.connectorType;
+    function drawTempLine(e) {
+        if (!startConnector) return;
+        const startRect = startConnector.getBoundingClientRect();
+        const canvasRect = canvas.getBoundingClientRect();
+        const startX = startRect.left + startRect.width / 2 - canvasRect.left;
+        const startY = startRect.top + startRect.height / 2 - canvasRect.top;
+        const endX = e.clientX - canvasRect.left;
+        const endY = e.clientY - canvasRect.top;
+        const d = `M ${startX} ${startY} C ${startX + 70} ${startY}, ${endX - 70} ${endY}, ${endX} ${endY}`;
+        tempLine.setAttribute('d', d);
+    }
 
-                if (startNodeId !== endNodeId && startType !== endType) {
-                    const fromNodeId = startType === 'output' ? startNodeId : endNodeId;
-                    const toNodeId = startType === 'output' ? endNodeId : startNodeId;
+    function endConnection(e) {
+        if (tempLine) {
+            tempLine.remove();
+            tempLine = null;
+        }
+        const endConnector = e.target.closest('.node-connector');
+        if (endConnector && endConnector !== startConnector) {
+            const startNodeId = startConnector.dataset.nodeId;
+            const endNodeId = endConnector.dataset.nodeId;
+            const startType = startConnector.dataset.connectorType;
+            const endType = endConnector.dataset.connectorType;
 
-                    const connectionExists = connections.some(c => c.from === fromNodeId && c.to === toNodeId);
-                    if (!connectionExists) {
-                        const newConnection = { from: fromNodeId, to: toNodeId };
-                        connections.push(newConnection);
-                        selectElement(newConnection);
-                    } else {
-                        showToast('连接已存在');
-                    }
+            if (startNodeId !== endNodeId && startType !== endType) {
+                const fromNodeId = startType === 'output' ? startNodeId : endNodeId;
+                const toNodeId = startType === 'output' ? endNodeId : startNodeId;
+
+                const connectionExists = connections.some(c => c.from === fromNodeId && c.to === toNodeId);
+                if (!connectionExists) {
+                    const newConnection = { from: fromNodeId, to: toNodeId };
+                    connections.push(newConnection);
+                    selectElement(newConnection);
+                } else {
+                    showToast('连接已存在');
                 }
             }
-            startConnector = null;
-            document.removeEventListener('mousemove', drawTempLine);
-            document.removeEventListener('mouseup', endConnection);
+        }
+        startConnector = null;
+        document.removeEventListener('mousemove', drawTempLine);
+        document.removeEventListener('mouseup', endConnection);
+        updateConnections();
+    }
+
+    function updateConnections() {
+        svgLayer.innerHTML = '';
+        connections.forEach(conn => {
+            const fromNodeEl = document.getElementById(conn.from);
+            const toNodeEl = document.getElementById(conn.to);
+            if (!fromNodeEl || !toNodeEl) return;
+
+            const startX = fromNodeEl.offsetLeft + fromNodeEl.offsetWidth;
+            const startY = fromNodeEl.offsetTop + fromNodeEl.offsetHeight / 2;
+            const endX = toNodeEl.offsetLeft;
+            const endY = toNodeEl.offsetTop + toNodeEl.offsetHeight / 2;
+            
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const d = `M ${startX} ${startY} C ${startX + 70} ${startY}, ${endX - 70} ${endY}, ${endX} ${endY}`;
+            path.setAttribute('d', d);
+            path.setAttribute('stroke-dasharray', '1000');
+
+            if (selectedElement && selectedElement.from === conn.from && selectedElement.to === conn.to) {
+                path.classList.add('selected');
+            }
+
+            path.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectElement(conn);
+            });
+
+            svgLayer.appendChild(path);
+        });
+    }
+    
+    function deleteSelected() {
+        let deleted = false;
+        if (selectedElement) {
+            if (selectedElement.id) { // Node
+                const nodeId = selectedElement.id;
+                document.getElementById(nodeId)?.remove();
+                nodes = nodes.filter(n => n.id !== nodeId);
+                connections = connections.filter(c => c.from !== nodeId && c.to !== nodeId);
+            } else { // Connection
+                connections = connections.filter(c => c.from !== selectedElement.from || c.to !== selectedElement.to);
+            }
+            deleted = true;
+            selectedElement = null;
+            propertiesPanel.classList.add('hidden');
+        }
+        
+        if (deleted) {
+            showToast('已删除所选元素');
             updateConnections();
         }
+    }
 
-        function updateConnections() {
-            svgLayer.innerHTML = '';
-            connections.forEach(conn => {
-                const fromNodeEl = document.getElementById(conn.from);
-                const toNodeEl = document.getElementById(conn.to);
-                if (!fromNodeEl || !toNodeEl) return;
+    document.addEventListener('keydown', (e) => {
+        if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+            return;
+        }
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+            e.preventDefault();
+            deleteSelected();
+        }
+    });
 
-                const startX = fromNodeEl.offsetLeft + fromNodeEl.offsetWidth;
-                const startY = fromNodeEl.offsetTop + fromNodeEl.offsetHeight / 2;
-                const endX = toNodeEl.offsetLeft;
-                const endY = toNodeEl.offsetTop + toNodeEl.offsetHeight / 2;
-                
-                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                const d = `M ${startX} ${startY} C ${startX + 70} ${startY}, ${endX - 70} ${endY}, ${endX} ${endY}`;
-                path.setAttribute('d', d);
-                path.setAttribute('stroke-dasharray', '1000');
+    // ==================== 创建工作流卡片 ====================
+    // 此函数根据工作流数据，动态生成一个HTML卡片并添加到列表中。
+    function addWorkflowCard(workflowData) {
+        const list = document.getElementById('workflow-list');
+        const newCard = document.createElement('div');
+        newCard.className = 'glassmorphism rounded-xl p-0 flex flex-col fade-in-up neon-border-accent';
+        newCard.style.animationDelay = '0s'; // 让新卡片立即显示动画
 
-                if (selectedElement && selectedElement.from === conn.from && selectedElement.to === conn.to) {
-                    path.classList.add('selected');
-                }
+        // 简化逻辑：找到第一个触发器和第一个动作节点用于展示
+        const triggerNode = workflowData.nodes.find(n => n.type.startsWith('trigger-'));
+        const actionNode = workflowData.nodes.find(n => n.type.startsWith('action-'));
 
-                path.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    selectElement(conn);
-                });
+        // 从节点配置中获取标题，并从节点实例中获取属性作为描述
+        const triggerTitle = triggerNode ? nodeConfigs[triggerNode.type].title : '未定义触发器';
+        const triggerDesc = triggerNode ? Object.values(triggerNode.properties).join(', ').substring(0, 50) + '...' : 'N/A';
+        const actionTitle = actionNode ? nodeConfigs[actionNode.type].title : '未定义动作';
+        const actionDesc = actionNode ? Object.values(actionNode.properties).join(', ').substring(0, 50) + '...' : 'N/A';
 
-                svgLayer.appendChild(path);
-            });
+        newCard.innerHTML = `
+            <!-- Card Header -->
+            <div class="p-4 flex justify-between items-start border-b border-green-500/20">
+                <div>
+                    <h3 class="text-xl font-bold">${workflowData.name}</h3>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-xs font-bold text-green-400">● 运行中</span>
+                        <label class="switch"><input type="checkbox" checked onchange="toggleWorkflowStatus(this, '${workflowData.name}')"><span class="slider"></span></label>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-400">今日执行: <span class="font-bold text-white">0 次</span></p>
+                    <p class="text-sm text-green-400">成功率: <span class="font-bold">N/A</span></p>
+                </div>
+            </div>
+            <!-- Card Body -->
+            <div class="p-4 flex flex-col lg:flex-row items-center gap-4 text-center">
+                <div class="flex-1">
+                    <p class="text-sm text-gray-400 mb-1">触发器 (TRIGGER)</p>
+                    <div class="bg-gray-900 p-3 rounded-lg min-h-[80px]">
+                        <p class="font-mono">当 <span class="text-cyan-400">${triggerTitle}</span></p>
+                        <p class="font-mono text-xs text-gray-500 mt-1 break-all">${triggerDesc}</p>
+                    </div>
+                </div>
+                <svg class="w-8 h-8 text-accent-color transform lg:rotate-0 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                <div class="flex-1">
+                    <p class="text-sm text-gray-400 mb-1">动作 (ACTION)</p>
+                    <div class="bg-gray-900 p-3 rounded-lg min-h-[80px]">
+                        <p class="font-mono">执行 <span class="text-purple-400">${actionTitle}</span></p>
+                        <p class="font-mono text-xs text-gray-500 mt-1 break-all">${actionDesc}</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Card Footer -->
+            <div class="p-3 bg-gray-900/30 rounded-b-xl flex justify-between items-center">
+                <p class="text-xs text-gray-500">上次执行: 从未</p>
+                <div class="flex gap-2">
+                    <button class="text-xs py-1 px-3 rounded bg-gray-700 hover:bg-gray-600" onclick="openModal('workflowEditorModal')">编辑</button>
+                    <button class="text-xs py-1 px-3 rounded bg-red-800/50 hover:bg-red-800/80" onclick="deleteWorkflow(this)">删除</button>
+                    <button class="text-xs py-1 px-3 rounded bg-cyan-600/50 hover:bg-cyan-600/80" onclick="openLogModal('${workflowData.name}')">查看日志</button>
+                </div>
+            </div>
+        `;
+        list.appendChild(newCard);
+    }
+    // ==========================================================
+
+    // ==================== 保存工作流功能 ====================
+    // 重写了 saveWorkflow 函数，使其能够收集编辑器数据、
+    // 调用 addWorkflowCard 创建新卡片，并重置编辑器状态。
+    function saveWorkflow() {
+        const workflowName = document.getElementById('workflowName').value || '未命名工作流';
+        if (nodes.length < 2 || connections.length === 0) {
+            showToast('错误: 工作流不完整，请至少连接两个节点', 'error');
+            return;
         }
         
-        function deleteSelected() {
-            let deleted = false;
-            if (selectedElement) {
-                if (selectedElement.id) { // Node
-                    const nodeId = selectedElement.id;
-                    document.getElementById(nodeId)?.remove();
-                    nodes = nodes.filter(n => n.id !== nodeId);
-                    connections = connections.filter(c => c.from !== nodeId && c.to !== nodeId);
-                } else { // Connection
-                    connections = connections.filter(c => c.from !== selectedElement.from || c.to !== selectedElement.to);
-                }
-                deleted = true;
-                selectedElement = null;
-                propertiesPanel.classList.add('hidden');
-            }
-            
-            if (deleted) {
-                showToast('已删除所选元素');
-                updateConnections();
-            }
-        }
+        // 1. 创建一个包含当前工作流所有信息的数据对象
+        const workflowData = {
+            id: `workflow-${Date.now()}`, // 使用时间戳确保ID唯一
+            name: workflowName,
+            nodes: JSON.parse(JSON.stringify(nodes)), // 使用深拷贝复制节点数据
+            connections: JSON.parse(JSON.stringify(connections)) // 使用深拷贝复制连接数据
+        };
 
-        document.addEventListener('keydown', (e) => {
-            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
-                return;
-            }
-            if (e.key === 'Delete' || e.key === 'Backspace') {
-                e.preventDefault();
-                deleteSelected();
-            }
-        });
-
-        function saveWorkflow() {
-            const workflowName = document.getElementById('workflowName').value || '未命名工作流';
-            if (nodes.length < 2 || connections.length === 0) {
-                showToast('错误: 工作流不完整，请至少连接两个节点');
-                return;
-            }
-            
-            // A real implementation would serialize nodes and connections.
-            showToast(`工作流 "${workflowName}" 已保存!`);
-            closeModal('workflowEditorModal');
-        }
-
-        // --- Dashboard Chart Logic ---
-        const ctx = document.getElementById('sentimentChart').getContext('2d');
-        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, 'rgba(0, 242, 255, 0.5)');
-        gradient.addColorStop(1, 'rgba(0, 242, 255, 0)');
-
-        const sentimentChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['7天前', '6天前', '5天前', '4天前', '3天前', '昨天', '今天'],
-                datasets: [{
-                    label: '信息量',
-                    data: [120, 190, 150, 250, 220, 300, 280],
-                    borderColor: '#00f2ff',
-                    backgroundColor: gradient,
-                    tension: 0.4,
-                    fill: true,
-                }, {
-                    label: '负面情绪指数',
-                    data: [20, 30, 25, 40, 60, 55, 50],
-                    borderColor: '#ff00ff',
-                    tension: 0.4,
-                    fill: false,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { labels: { color: '#e0e0e0' } } },
-                scales: {
-                    y: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#e0e0e0' } },
-                    x: { grid: { display: false }, ticks: { color: '#e0e0e0' } }
-                }
-            }
-        });
-
-        // --- Word Cloud Logic ---
-        const words = [
-            {text: '电池续航', size: 90}, {text: 'OTA升级', size: 80},
-            {text: '智能驾驶', size: 75}, {text: '车机卡顿', size: 70, color: '#ff00ff'},
-            {text: '交付', size: 60}, {text: '供应链', size: 55, color: '#ffc107'},
-            {text: 'checklist', size: 50}, {text: '渲染引擎', size: 48},
-            {text: '固态电池', size: 45}, {text: '用户建议', size: 42},
-            {text: 'KOL', size: 40}, {text: '售后', size: 38},
-            {text: '价格', size: 35}, {text: '内饰', size: 32},
-        ];
-
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => { clearTimeout(timeout); func(...args); };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        function renderWordCloud() {
-            const container = document.getElementById('wordCloud');
-            if (!container || container.clientWidth === 0 || container.clientHeight === 0) return;
-
-            d3.select("#wordCloud").selectAll("*").remove(); 
-            const layout = d3.layout.cloud()
-                .size([container.clientWidth, container.clientHeight])
-                .words(words.map(d => ({...d})))
-                .padding(5).rotate(() => (~~(Math.random() * 6) - 3) * 15)
-                .font('Noto Sans SC').fontSize(d => d.size)
-                .on("end", draw);
-            layout.start();
-
-            function draw(words) {
-                d3.select("#wordCloud").append("svg")
-                    .attr("width", layout.size()[0]).attr("height", layout.size()[1])
-                    .append("g").attr("transform", `translate(${layout.size()[0] / 2},${layout.size()[1] / 2})`)
-                    .selectAll("text").data(words).enter().append("text")
-                    .style("font-size", d => d.size + "px").style("font-family", "Noto Sans SC")
-                    .style("fill", d => d.color || '#00f2ff').attr("text-anchor", "middle")
-                    .attr("transform", d => `translate(${d.x},${d.y})rotate(${d.rotate})`)
-                    .text(d => d.text).style("opacity", 0).transition().duration(1000).style("opacity", 1);
-            }
-        }
+        // 2. 调用新函数来创建并添加卡片到UI
+        addWorkflowCard(workflowData);
         
-        const debouncedRenderWordCloud = debounce(renderWordCloud, 100);
+        showToast(`工作流 "${workflowName}" 已保存并激活!`);
+        closeModal('workflowEditorModal');
 
-        // Initial setup
-        document.addEventListener('DOMContentLoaded', () => {
-            const initialView = window.location.hash.substring(1) || 'dashboard';
-            const initialLink = document.querySelector(`.sidebar-item[href="#${initialView}"]`);
-            if(initialLink) {
-                switchView(initialView, initialLink);
-            } else {
-                switchView('dashboard', document.querySelector('.sidebar-item'));
+        // 3. 重置编辑器状态，以便创建下一个工作流
+        nodes = [];
+        connections = [];
+        nodeIdCounter = 0;
+        selectedElement = null;
+        
+        // 从DOM中移除画布上的所有节点
+        const canvasNodes = canvas.querySelectorAll('.canvas-node');
+        canvasNodes.forEach(node => node.remove());
+        
+        // 清空SVG层上的所有连接线
+        svgLayer.innerHTML = '';
+        
+        // 重置工作流名称输入框
+        document.getElementById('workflowName').value = '新的工作流';
+        propertiesPanel.classList.add('hidden');
+    }
+    // ==========================================================
+
+    // --- Dashboard Chart Logic ---
+    const ctx = document.getElementById('sentimentChart').getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(0, 242, 255, 0.5)');
+    gradient.addColorStop(1, 'rgba(0, 242, 255, 0)');
+
+    const sentimentChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['7天前', '6天前', '5天前', '4天前', '3天前', '昨天', '今天'],
+            datasets: [{
+                label: '信息量',
+                data: [120, 190, 150, 250, 220, 300, 280],
+                borderColor: '#00f2ff',
+                backgroundColor: gradient,
+                tension: 0.4,
+                fill: true,
+            }, {
+                label: '负面情绪指数',
+                data: [20, 30, 25, 40, 60, 55, 50],
+                borderColor: '#ff00ff',
+                tension: 0.4,
+                fill: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#e0e0e0' } } },
+            scales: {
+                y: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#e0e0e0' } },
+                x: { grid: { display: false }, ticks: { color: '#e0e0e0' } }
             }
-            new ResizeObserver(debouncedRenderWordCloud).observe(document.getElementById('wordCloud'));
-        });
+        }
+    });
 
-    </script>
+    // --- Word Cloud Logic ---
+    const words = [
+        {text: '电池续航', size: 90}, {text: 'OTA升级', size: 80},
+        {text: '智能驾驶', size: 75}, {text: '车机卡顿', size: 70, color: '#ff00ff'},
+        {text: '交付', size: 60}, {text: '供应链', size: 55, color: '#ffc107'},
+        {text: 'checklist', size: 50}, {text: '渲染引擎', size: 48},
+        {text: '固态电池', size: 45}, {text: '用户建议', size: 42},
+        {text: 'KOL', size: 40}, {text: '售后', size: 38},
+        {text: '价格', size: 35}, {text: '内饰', size: 32},
+    ];
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => { clearTimeout(timeout); func(...args); };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    function renderWordCloud() {
+        const container = document.getElementById('wordCloud');
+        if (!container || container.clientWidth === 0 || container.clientHeight === 0) return;
+
+        d3.select("#wordCloud").selectAll("*").remove(); 
+        const layout = d3.layout.cloud()
+            .size([container.clientWidth, container.clientHeight])
+            .words(words.map(d => ({...d})))
+            .padding(5).rotate(() => (~~(Math.random() * 6) - 3) * 15)
+            .font('Noto Sans SC').fontSize(d => d.size)
+            .on("end", draw);
+        layout.start();
+
+        function draw(words) {
+            d3.select("#wordCloud").append("svg")
+                .attr("width", layout.size()[0]).attr("height", layout.size()[1])
+                .append("g").attr("transform", `translate(${layout.size()[0] / 2},${layout.size()[1] / 2})`)
+                .selectAll("text").data(words).enter().append("text")
+                .style("font-size", d => d.size + "px").style("font-family", "Noto Sans SC")
+                .style("fill", d => d.color || '#00f2ff').attr("text-anchor", "middle")
+                .attr("transform", d => `translate(${d.x},${d.y})rotate(${d.rotate})`)
+                .text(d => d.text).style("opacity", 0).transition().duration(1000).style("opacity", 1);
+        }
+    }
+    
+    const debouncedRenderWordCloud = debounce(renderWordCloud, 100);
+
+    // Initial setup
+    document.addEventListener('DOMContentLoaded', () => {
+        // ==================== 更新HTML中的删除按钮 ====================
+        // 将现有的两个mock工作流卡片中的删除按钮onclick事件改为新的函数。
+        document.querySelectorAll('#workflow-list .bg-red-800\\/50').forEach(button => {
+            button.setAttribute('onclick', 'deleteWorkflow(this)');
+        });
+        // ================================================================
+
+        const initialView = window.location.hash.substring(1) || 'dashboard';
+        const initialLink = document.querySelector(`.sidebar-item[href="#${initialView}"]`);
+        if(initialLink) {
+            switchView(initialView, initialLink);
+        } else {
+            switchView('dashboard', document.querySelector('.sidebar-item'));
+        }
+        new ResizeObserver(debouncedRenderWordCloud).observe(document.getElementById('wordCloud'));
+    });
+
+</script>
+
 </body>
 </html>
