@@ -1372,14 +1372,14 @@
             borderColor: 'border-cyan-400',
             // [NEW] propertiesSchema 定义了配置面板的字段
             propertiesSchema: [
-                { key: 'uri', label: 'MongoDB URI', inputType: 'text' },
+                { key: 'uri', label: 'URI', inputType: 'text' },
                 { key: 'username', label: '用户名', inputType: 'text' },
                 { key: 'password', label: '密码', inputType: 'password' },
                 { key: 'database', label: '数据库名', inputType: 'text' },
                 { key: 'collection', label: '集合名 (表名)', inputType: 'text' },
             ],
             // [MODIFIED] 默认属性，与 schema 对应
-            properties: { uri: 'mongodb://localhost:27017', username: 'user', password: 'password', database: 'prod_db', collection: 'user_feedback' }
+            properties: { uri: 'mongodb://120.24.95.4:27017', username: 'root', password: 'password', database: 'prod_db', collection: 'user_feedback' }
         },
         'trigger-schedule': {
             title: '定时触发',
@@ -1435,10 +1435,10 @@
             colorClass: 'text-purple-300',
             borderColor: 'border-purple-400',
             propertiesSchema: [
-                { key: 'channel', label: '群聊/频道', inputType: 'text' },
+                { key: 'channel', label: '工号', inputType: 'text' },
                 { key: 'message', label: '消息内容 (支持变量)', inputType: 'textarea' }
             ],
-            properties: { channel: '#general', message: '来自OASIS的通知: {{input.summary}}' }
+            properties: { channel: '{{work_no}}', message: '来自自动化行动中心的通知: {{input.summary}}' }
         },
         'action-todo': {
             title: '创建待办事项',
