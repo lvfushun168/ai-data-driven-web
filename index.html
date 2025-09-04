@@ -11,11 +11,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-cloud@1.2.5/build/d3.layout.cloud.js"></script>
-    <!-- 引入PrismJS用于代码高亮 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
-    <!-- 引入marked.js用于将Markdown转为HTML -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 
@@ -55,12 +53,12 @@
             color: var(--primary-color);
             text-shadow: 0 0 5px var(--primary-color), 0 0 10px var(--primary-color), 0 0 15px var(--glow-color-primary);
         }
-        
+
         .neon-text-secondary {
             color: var(--secondary-color);
             text-shadow: 0 0 5px var(--secondary-color), 0 0 10px var(--secondary-color), 0 0 15px var(--glow-color-secondary);
         }
-        
+
         .neon-text-accent {
             color: var(--accent-color);
             text-shadow: 0 0 5px var(--accent-color), 0 0 10px var(--accent-color), 0 0 15px var(--glow-color-accent);
@@ -70,12 +68,12 @@
             border: 1px solid var(--primary-color);
             box-shadow: 0 0 8px var(--glow-color-primary), inset 0 0 8px var(--glow-color-primary);
         }
-        
+
         .neon-border-secondary {
             border: 1px solid var(--secondary-color);
             box-shadow: 0 0 8px var(--glow-color-secondary), inset 0 0 8px var(--glow-color-secondary);
         }
-        
+
         .neon-border-accent {
             border: 1px solid var(--accent-color);
             box-shadow: 0 0 8px var(--glow-color-accent), inset 0 0 8px var(--glow-color-accent);
@@ -89,7 +87,7 @@
             transform: scale(1.1);
             text-shadow: 0 0 10px var(--glow-color-primary);
         }
-        
+
         .sidebar-item.active {
             background: linear-gradient(90deg, rgba(0, 242, 255, 0.15) 0%, rgba(0, 242, 255, 0) 100%);
             border-right: 3px solid var(--primary-color);
@@ -121,7 +119,7 @@
             background-color: rgba(0, 242, 255, 0.1);
             box-shadow: 0 0 8px var(--glow-color-primary);
         }
-        
+
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
@@ -137,7 +135,7 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #00ffff;
         }
-        
+
         /* Animation for cards */
         .fade-in-up {
             animation: fadeInUp 0.5s ease-out forwards;
@@ -153,7 +151,7 @@
                 transform: translateY(0);
             }
         }
-        
+
         /* Toast Notification */
         #toast-container {
             position: fixed;
@@ -176,13 +174,13 @@
             transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
         .toast.error {
-             background: linear-gradient(135deg, #ff6b6b, #ff00ff);
+            background: linear-gradient(135deg, #ff6b6b, #ff00ff);
         }
         .toast.show {
             opacity: 1;
             transform: translateX(0);
         }
-        
+
         /* Switch toggle */
         .switch {
             position: relative;
@@ -269,8 +267,8 @@
         }
         #workflow-canvas {
             background-image:
-                linear-gradient(rgba(0, 242, 255, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 242, 255, 0.1) 1px, transparent 1px);
+                    linear-gradient(rgba(0, 242, 255, 0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 242, 255, 0.1) 1px, transparent 1px);
             background-size: 20px 20px;
             position: relative;
             overflow: hidden;
@@ -390,654 +388,618 @@
 </head>
 <body class="flex min-h-screen">
 
-    <!-- Toast Container -->
-    <div id="toast-container"></div>
+<div id="toast-container"></div>
 
-    <!-- Sidebar -->
-    <aside class="w-20 lg:w-64 bg-gray-900/30 p-4 lg:p-6 flex flex-col items-center lg:items-start shrink-0 border-r border-gray-800">
-        <div class="flex items-center gap-2 mb-12">
-            <svg class="w-10 h-10 neon-text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 7L12 12L22 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 12V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <h1 class="font-orbitron text-2xl font-bold hidden lg:block">OASIS</h1>
-        </div>
-        <nav class="w-full flex flex-col gap-4">
-            <a href="#dashboard" class="sidebar-item active p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('dashboard', this)">
-                <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                <span class="hidden lg:inline">仪表盘</span>
-            </a>
-            <a href="#data-sources" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('data-sources', this)">
-                <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                <span class="hidden lg:inline">数据源管理</span>
-            </a>
-            <a href="#insight-lab" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('insight-lab', this)">
-                <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path></svg>
-                <span class="hidden lg:inline">AI 引擎实验室</span>
-            </a>
-            <a href="#action-center" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('action-center', this)">
-                <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                <span class="hidden lg:inline">自动化行动中心</span>
-            </a>
-            <a href="#knowledge-base" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('knowledge-base', this)">
-                 <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path><path d="M12 3v18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-                <span class="hidden lg:inline">知识沉淀库</span>
-            </a>
-        </nav>
-        <div class="mt-auto w-full">
-            <a href="#settings" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('settings', this)">
-                <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                <span class="hidden lg:inline">平台设置</span>
-            </a>
-        </div>
-    </aside>
+<aside class="w-20 lg:w-64 bg-gray-900/30 p-4 lg:p-6 flex flex-col items-center lg:items-start shrink-0 border-r border-gray-800">
+    <div class="flex items-center gap-2 mb-12">
+        <svg class="w-10 h-10 neon-text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 7L12 12L22 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 12V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h1 class="font-orbitron text-2xl font-bold hidden lg:block">OASIS</h1>
+    </div>
+    <nav class="w-full flex flex-col gap-4">
+        <a href="#dashboard" class="sidebar-item active p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('dashboard', this)">
+            <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            <span class="hidden lg:inline">仪表盘</span>
+        </a>
+        <a href="#data-sources" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('data-sources', this)">
+            <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            <span class="hidden lg:inline">数据源管理</span>
+        </a>
+        <a href="#insight-lab" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('insight-lab', this)">
+            <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path></svg>
+            <span class="hidden lg:inline">AI 引擎实验室</span>
+        </a>
+        <a href="#action-center" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('action-center', this)">
+            <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <span class="hidden lg:inline">自动化行动中心</span>
+        </a>
+        <a href="#knowledge-base" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('knowledge-base', this)">
+            <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path><path d="M12 3v18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+            <span class="hidden lg:inline">知识沉淀库</span>
+        </a>
+    </nav>
+    <div class="mt-auto w-full">
+        <a href="#settings" class="sidebar-item p-3 rounded-lg flex items-center gap-4 text-gray-300 hover:text-white" onclick="switchView('settings', this)">
+            <svg class="sidebar-icon w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <span class="hidden lg:inline">平台设置</span>
+        </a>
+    </div>
+</aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-        
-        <!-- View: Dashboard -->
-        <div id="view-dashboard" class="view-content">
-            <header class="mb-8">
-                <h2 class="text-3xl font-bold font-orbitron">全局态势仪表盘</h2>
-                <p class="text-gray-400">实时洞察所有信息源的动态与趋势</p>
-            </header>
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-                <!-- Key Metrics -->
-                <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.1s;">
-                    <h3 class="text-gray-400 text-lg">新增待办 (ToDo)</h3>
-                    <p class="text-4xl font-bold neon-text-primary mt-2">12</p>
-                    <p class="text-sm text-green-400 mt-1">+3 since last login</p>
-                </div>
-                <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.2s;">
-                    <h3 class="text-gray-400 text-lg">关键决策点</h3>
-                    <p class="text-4xl font-bold neon-text-primary mt-2">4</p>
-                     <p class="text-sm text-gray-400 mt-1">本周已识别</p>
-                </div>
-                <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.3s;">
-                    <h3 class="text-gray-400 text-lg">高优告警</h3>
-                    <p class="text-4xl font-bold neon-text-secondary mt-2">2</p>
-                    <p class="text-sm text-red-400 mt-1">用户负面情绪激增</p>
-                </div>
-                <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.4s;">
-                    <h3 class="text-gray-400 text-lg">知识库新增</h3>
-                    <p class="text-4xl font-bold neon-text-primary mt-2">27</p>
-                    <p class="text-sm text-gray-400 mt-1">自动归档FAQ和案例</p>
-                </div>
+<main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
 
-                <!-- Main Chart -->
-                <div class="md:col-span-2 xl:col-span-2 glassmorphism rounded-xl p-6 flex flex-col fade-in-up" style="animation-delay: 0.5s;">
-                    <h3 class="text-xl font-bold mb-4">信息流动 & 情感趋势 (近7天)</h3>
-                    <div class="relative h-64">
-                        <canvas id="sentimentChart"></canvas>
+    <div id="view-dashboard" class="view-content">
+        <header class="mb-8">
+            <h2 class="text-3xl font-bold font-orbitron">全局态势仪表盘</h2>
+            <p class="text-gray-400">实时洞察所有信息源的动态与趋势</p>
+        </header>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.1s;">
+                <h3 class="text-gray-400 text-lg">新增待办 (ToDo)</h3>
+                <p class="text-4xl font-bold neon-text-primary mt-2">12</p>
+                <p class="text-sm text-green-400 mt-1">+3 since last login</p>
+            </div>
+            <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.2s;">
+                <h3 class="text-gray-400 text-lg">关键决策点</h3>
+                <p class="text-4xl font-bold neon-text-primary mt-2">4</p>
+                <p class="text-sm text-gray-400 mt-1">本周已识别</p>
+            </div>
+            <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.3s;">
+                <h3 class="text-gray-400 text-lg">高优告警</h3>
+                <p class="text-4xl font-bold neon-text-secondary mt-2">2</p>
+                <p class="text-sm text-red-400 mt-1">用户负面情绪激增</p>
+            </div>
+            <div class="glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.4s;">
+                <h3 class="text-gray-400 text-lg">知识库新增</h3>
+                <p class="text-4xl font-bold neon-text-primary mt-2">27</p>
+                <p class="text-sm text-gray-400 mt-1">自动归档FAQ和案例</p>
+            </div>
+
+            <div class="md:col-span-2 xl:col-span-2 glassmorphism rounded-xl p-6 flex flex-col fade-in-up" style="animation-delay: 0.5s;">
+                <h3 class="text-xl font-bold mb-4">信息流动 & 情感趋势 (近7天)</h3>
+                <div class="relative h-64">
+                    <canvas id="sentimentChart"></canvas>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 xl:col-span-2 glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.6s;">
+                <h3 class="text-xl font-bold mb-4">热点主题词云</h3>
+                <div id="wordCloud" class="w-full h-64"></div>
+            </div>
+
+            <div class="xl:col-span-4 glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.7s;">
+                <h3 class="text-xl font-bold mb-4">最新AI摘要</h3>
+                <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
+                    <div class="p-4 bg-gray-900/50 rounded-lg border-l-4 border-cyan-400">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-cyan-300">【钉钉】F3项目交付冲刺群</h4>
+                            <span class="text-xs text-gray-500">5分钟前</span>
+                        </div>
+                        <p class="text-sm text-gray-300">摘要：会议确定了下周交付的最终checklist，@张伟 负责的渲染引擎优化需在周三前完成。发现一个潜在风险：供应链芯片可能延迟到货。</p>
+                        <div class="mt-2 flex gap-2">
+                            <span class="text-xs bg-cyan-900 text-cyan-300 px-2 py-1 rounded">决策点</span>
+                            <span class="text-xs bg-yellow-900 text-yellow-300 px-2 py-1 rounded">风险预警</span>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Topic Cloud -->
-                <div class="md:col-span-2 xl:col-span-2 glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.6s;">
-                    <h3 class="text-xl font-bold mb-4">热点主题词云</h3>
-                    <div id="wordCloud" class="w-full h-64"></div>
-                </div>
-
-                <!-- Recent Summaries -->
-                <div class="xl:col-span-4 glassmorphism rounded-xl p-6 fade-in-up" style="animation-delay: 0.7s;">
-                    <h3 class="text-xl font-bold mb-4">最新AI摘要</h3>
-                    <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
-                        <div class="p-4 bg-gray-900/50 rounded-lg border-l-4 border-cyan-400">
-                            <div class="flex justify-between items-center mb-1">
-                                <h4 class="font-bold text-cyan-300">【钉钉】F3项目交付冲刺群</h4>
-                                <span class="text-xs text-gray-500">5分钟前</span>
-                            </div>
-                            <p class="text-sm text-gray-300">摘要：会议确定了下周交付的最终checklist，@张伟 负责的渲染引擎优化需在周三前完成。发现一个潜在风险：供应链芯片可能延迟到货。</p>
-                            <div class="mt-2 flex gap-2">
-                                <span class="text-xs bg-cyan-900 text-cyan-300 px-2 py-1 rounded">决策点</span>
-                                <span class="text-xs bg-yellow-900 text-yellow-300 px-2 py-1 rounded">风险预警</span>
-                            </div>
+                    <div class="p-4 bg-gray-900/50 rounded-lg border-l-4 border-purple-400">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-purple-300">【汽车之家】NE-900车型论坛</h4>
+                            <span class="text-xs text-gray-500">30分钟前</span>
                         </div>
-                        <div class="p-4 bg-gray-900/50 rounded-lg border-l-4 border-purple-400">
-                            <div class="flex justify-between items-center mb-1">
-                                <h4 class="font-bold text-purple-300">【汽车之家】NE-900车型论坛</h4>
-                                <span class="text-xs text-gray-500">30分钟前</span>
-                            </div>
-                            <p class="text-sm text-gray-300">摘要：大量用户集中讨论新的OTA升级，普遍反馈续航有提升，但对车机系统卡顿的抱怨增多。KOL“车长老”发布了详细评测，指出智能驾驶辅助在雨天表现不佳。</p>
-                             <div class="mt-2 flex gap-2">
-                                <span class="text-xs bg-green-900 text-green-300 px-2 py-1 rounded">正面反馈</span>
-                                <span class="text-xs bg-red-900 text-red-300 px-2 py-1 rounded">产品槽点</span>
-                            </div>
+                        <p class="text-sm text-gray-300">摘要：大量用户集中讨论新的OTA升级，普遍反馈续航有提升，但对车机系统卡顿的抱怨增多。KOL“车长老”发布了详细评测，指出智能驾驶辅助在雨天表现不佳。</p>
+                        <div class="mt-2 flex gap-2">
+                            <span class="text-xs bg-green-900 text-green-300 px-2 py-1 rounded">正面反馈</span>
+                            <span class="text-xs bg-red-900 text-red-300 px-2 py-1 rounded">产品槽点</span>
                         </div>
-                         <div class="p-4 bg-gray-900/50 rounded-lg border-l-4 border-green-400">
-                            <div class="flex justify-between items-center mb-1">
-                                <h4 class="font-bold text-green-300">【知乎】关于新能源汽车电池技术讨论</h4>
-                                <span class="text-xs text-gray-500">1小时前</span>
-                            </div>
-                            <p class="text-sm text-gray-300">摘要：关于固态电池的讨论成为热点，多数观点认为5年内难以商业化。有用户建议公司可以开放电池健康度检测的更多数据给车主。</p>
-                             <div class="mt-2 flex gap-2">
-                                <span class="text-xs bg-blue-900 text-blue-300 px-2 py-1 rounded">技术趋势</span>
-                                <span class="text-xs bg-purple-900 text-purple-300 px-2 py-1 rounded">功能建议</span>
-                            </div>
+                    </div>
+                    <div class="p-4 bg-gray-900/50 rounded-lg border-l-4 border-green-400">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-green-300">【知乎】关于新能源汽车电池技术讨论</h4>
+                            <span class="text-xs text-gray-500">1小时前</span>
+                        </div>
+                        <p class="text-sm text-gray-300">摘要：关于固态电池的讨论成为热点，多数观点认为5年内难以商业化。有用户建议公司可以开放电池健康度检测的更多数据给车主。</p>
+                        <div class="mt-2 flex gap-2">
+                            <span class="text-xs bg-blue-900 text-blue-300 px-2 py-1 rounded">技术趋势</span>
+                            <span class="text-xs bg-purple-900 text-purple-300 px-2 py-1 rounded">功能建议</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- View: Data Sources -->
-        <div id="view-data-sources" class="view-content hidden">
-            <header class="mb-8">
-                <h2 class="text-3xl font-bold font-orbitron">数据源连接器管理</h2>
-                <p class="text-gray-400">可插拔式设计，轻松连接、配置和管理您的信息来源。</p>
-            </header>
-            <div class="mb-6 text-right">
-                <button class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="openModal('addDataSourceModal')">
-                    + 添加新的数据源
-                </button>
+    </div>
+
+    <div id="view-data-sources" class="view-content hidden">
+        <header class="mb-8">
+            <h2 class="text-3xl font-bold font-orbitron">数据源连接器管理</h2>
+            <p class="text-gray-400">可插拔式设计，轻松连接、配置和管理您的信息来源。</p>
+        </header>
+        <div class="mb-6 text-right">
+            <button class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="openModal('addDataSourceModal')">
+                + 添加新的数据源
+            </button>
+        </div>
+        <div id="data-source-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up">
+                <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-07-31/badc2b31-e6b5-4026-b117-5597bbd0c20b.jpeg" class="w-16 h-16 mb-4 object-contain" alt="钉钉图标"/>
+                <h3 class="text-xl font-bold">钉钉</h3>
+                <p class="text-sm text-green-400 font-bold my-2">已连接 (5个群聊)</p>
+                <p class="text-xs text-gray-400 flex-grow">实时同步内部项目群、售后支持群的对话。</p>
+                <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
             </div>
-            <div id="data-source-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <!-- Data Source Cards -->
-                <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up">
-                    <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-07-31/badc2b31-e6b5-4026-b117-5597bbd0c20b.jpeg" class="w-16 h-16 mb-4 object-contain" alt="钉钉图标"/>
-                    <h3 class="text-xl font-bold">钉钉</h3>
-                    <p class="text-sm text-green-400 font-bold my-2">已连接 (5个群聊)</p>
-                    <p class="text-xs text-gray-400 flex-grow">实时同步内部项目群、售后支持群的对话。</p>
-                    <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
-                </div>
-                <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up" style="animation-delay: 0.1s;">
-                    <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-07-31/ca51d189-3c4d-44f8-9a34-848f4cd3c54b.jpeg" class="w-16 h-16 mb-4 object-contain" alt="企业微信图标"/>
-                    <h3 class="text-xl font-bold">企业微信</h3>
-                    <p class="text-sm text-green-400 font-bold my-2">已连接 (2个群聊)</p>
-                    <p class="text-xs text-gray-400 flex-grow">同步销服团队与客户的沟通记录。</p>
-                    <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
-                </div>
-                <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up" style="animation-delay: 0.2s;">
-                    <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-07-31/e1586104-dc89-4b4d-bfd0-7d1dd583e7ba.png" class="w-16 h-16 mb-4 object-contain" alt="知乎图标"/>
-                    <h3 class="text-xl font-bold">知乎</h3>
-                    <p class="text-sm text-green-400 font-bold my-2">已连接</p>
-                    <p class="text-xs text-gray-400 flex-grow">监控与品牌、技术相关的热门问题和回答。</p>
-                    <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
-                </div>
-                <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up" style="animation-delay: 0.3s;">
-                    <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-07-31/7fcc3f94-79df-4d18-be62-03af48451022.png" class="w-16 h-16 mb-4 object-contain" alt="汽车之家图标"/>
-                    <h3 class="text-xl font-bold">汽车之家</h3>
-                    <p class="text-sm text-yellow-400 font-bold my-2">连接中...</p>
-                    <p class="text-xs text-gray-400 flex-grow">实时追踪核心车型论坛的长帖和用户反馈。</p>
-                    <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
-                </div>
-                <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up opacity-60" style="animation-delay: 0.4s;">
-                     <img src="https://img.icons8.com/color/96/weibo.png" class="w-16 h-16 mb-4" alt="微博图标"/>
-                    <h3 class="text-xl font-bold">微博</h3>
-                    <p class="text-sm text-gray-500 font-bold my-2">未连接</p>
-                    <p class="text-xs text-gray-400 flex-grow">连接后可监控品牌相关的公开微博和评论区。</p>
-                    <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('连接成功')">连接</button>
-                </div>
-                 <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up opacity-60" style="animation-delay: 0.5s;">
-                    <img src="https://img.icons8.com/color/96/jira.png" class="w-16 h-16 mb-4" alt="Jira图标"/>
-                    <h3 class="text-xl font-bold">Jira</h3>
-                    <p class="text-sm text-gray-500 font-bold my-2">未连接</p>
-                    <p class="text-xs text-gray-400 flex-grow">连接后可实现对话中的任务与Jira工单联动。</p>
-                    <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('连接成功')">连接</button>
-                </div>
-                 <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up opacity-60" style="animation-delay: 0.6s;">
-                    <svg class="w-16 h-16 mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-                    <h3 class="text-xl font-bold">开放平台API</h3>
-                    <p class="text-sm text-gray-500 font-bold my-2">可用</p>
-                    <p class="text-xs text-gray-400 flex-grow">通过SDK和API接入您自己的任意内部系统。</p>
-                    <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('已复制API文档链接')">查看文档</button>
-                </div>
+            <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up" style="animation-delay: 0.1s;">
+                <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-07-31/ca51d189-3c4d-44f8-9a34-848f4cd3c54b.jpeg" class="w-16 h-16 mb-4 object-contain" alt="企业微信图标"/>
+                <h3 class="text-xl font-bold">企业微信</h3>
+                <p class="text-sm text-green-400 font-bold my-2">已连接 (2个群聊)</p>
+                <p class="text-xs text-gray-400 flex-grow">同步销服团队与客户的沟通记录。</p>
+                <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
+            </div>
+            <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up" style="animation-delay: 0.2s;">
+                <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-07-31/e1586104-dc89-4b4d-bfd0-7d1dd583e7ba.png" class="w-16 h-16 mb-4 object-contain" alt="知乎图标"/>
+                <h3 class="text-xl font-bold">知乎</h3>
+                <p class="text-sm text-green-400 font-bold my-2">已连接</p>
+                <p class="text-xs text-gray-400 flex-grow">监控与品牌、技术相关的热门问题和回答。</p>
+                <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
+            </div>
+            <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up" style="animation-delay: 0.3s;">
+                <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-07-31/7fcc3f94-79df-4d18-be62-03af48451022.png" class="w-16 h-16 mb-4 object-contain" alt="汽车之家图标"/>
+                <h3 class="text-xl font-bold">汽车之家</h3>
+                <p class="text-sm text-yellow-400 font-bold my-2">连接中...</p>
+                <p class="text-xs text-gray-400 flex-grow">实时追踪核心车型论坛的长帖和用户反馈。</p>
+                <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
+            </div>
+            <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up opacity-60" style="animation-delay: 0.4s;">
+                <img src="https://img.icons8.com/color/96/weibo.png" class="w-16 h-16 mb-4" alt="微博图标"/>
+                <h3 class="text-xl font-bold">微博</h3>
+                <p class="text-sm text-gray-500 font-bold my-2">未连接</p>
+                <p class="text-xs text-gray-400 flex-grow">连接后可监控品牌相关的公开微博和评论区。</p>
+                <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('连接成功')">连接</button>
+            </div>
+            <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up opacity-60" style="animation-delay: 0.5s;">
+                <img src="https://img.icons8.com/color/96/jira.png" class="w-16 h-16 mb-4" alt="Jira图标"/>
+                <h3 class="text-xl font-bold">Jira</h3>
+                <p class="text-sm text-gray-500 font-bold my-2">未连接</p>
+                <p class="text-xs text-gray-400 flex-grow">连接后可实现对话中的任务与Jira工单联动。</p>
+                <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('连接成功')">连接</button>
+            </div>
+            <div class="glassmorphism rounded-xl p-6 text-center flex flex-col items-center fade-in-up opacity-60" style="animation-delay: 0.6s;">
+                <svg class="w-16 h-16 mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                <h3 class="text-xl font-bold">开放平台API</h3>
+                <p class="text-sm text-gray-500 font-bold my-2">可用</p>
+                <p class="text-xs text-gray-400 flex-grow">通过SDK和API接入您自己的任意内部系统。</p>
+                <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('已复制API文档链接')">查看文档</button>
             </div>
         </div>
+    </div>
 
-        <!-- View: Insight Lab (MODIFIED FOR STREAMING) -->
-        <div id="view-insight-lab" class="view-content hidden">
-            <header class="mb-8">
-                <h2 class="text-3xl font-bold font-orbitron">AI 引擎实验室</h2>
-                <p class="text-gray-400">在此处快速测试和验证AI模型的能力，无需创建完整的工作流。</p>
-            </header>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-12rem)]">
-                <!-- Input Panel -->
-                <div class="lg:col-span-1 glassmorphism rounded-xl p-4 flex flex-col fade-in-up">
-                    <h3 class="text-xl font-bold mb-4 neon-text-primary">1. 输入原始文本</h3>
-                    <textarea id="lab-input-text" class="w-full flex-grow bg-gray-900/50 border border-gray-700 rounded-md p-3 text-sm resize-none" placeholder="在此处粘贴需要分析的文本，例如会议记录、聊天摘要、用户评论等..."></textarea>
-                </div>
-                
-                <!-- Config & Action Panel -->
-                <div class="lg:col-span-1 glassmorphism rounded-xl p-4 flex flex-col fade-in-up" style="animation-delay: 0.1s;">
-                    <h3 class="text-xl font-bold mb-4 neon-text-accent">2. 配置分析引擎</h3>
-                    <div id="lab-config-panel" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-1">选择AI能力 (生成对应指令)</label>
-                            <select id="lab-ai-task-select" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2">
-                                <option value="summary">文本摘要</option>
-                                <option value="todo">任务提取 (ToDo)</option>
-                                <option value="sentiment">情感与意图分析</option>
-                                <option value="ner">命名实体识别 (NER)</option>
-                                <option value="topic">主题建模</option>
-                                <option value="freeform">自由对话</option>
-                            </select>
-                        </div>
-                        <div id="lab-model-params" class="space-y-3 p-3 border border-gray-700 rounded-md">
-                            <!-- Parameters will be dynamically inserted here -->
-                        </div>
-                    </div>
-                    <div class="mt-auto">
-                        <button id="lab-run-button" class="btn-primary w-full py-3 rounded-lg font-bold text-lg" onclick="runLabAnalysis()">
-                            运行分析
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Output Panel -->
-                <div class="lg:col-span-1 glassmorphism rounded-xl p-4 flex flex-col fade-in-up" style="animation-delay: 0.2s;">
-                    <h3 class="text-xl font-bold mb-4 neon-text-secondary">3. 分析结果</h3>
-                    <div id="lab-output-container" class="w-full flex-grow bg-gray-900/50 border border-gray-700 rounded-md p-3 overflow-auto">
-                        <div id="lab-output-markdown" class="markdown-body"></div>
-                    </div>
-                </div>
+    <div id="view-insight-lab" class="view-content hidden">
+        <header class="mb-8">
+            <h2 class="text-3xl font-bold font-orbitron">AI 引擎实验室</h2>
+            <p class="text-gray-400">在此处快速测试和验证AI模型的能力，无需创建完整的工作流。</p>
+        </header>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-12rem)]">
+            <div class="lg:col-span-1 glassmorphism rounded-xl p-4 flex flex-col fade-in-up">
+                <h3 class="text-xl font-bold mb-4 neon-text-primary">1. 输入原始文本</h3>
+                <textarea id="lab-input-text" class="w-full flex-grow bg-gray-900/50 border border-gray-700 rounded-md p-3 text-sm resize-none" placeholder="在此处粘贴需要分析的文本，例如会议记录、聊天摘要、用户评论等..."></textarea>
             </div>
-        </div>
 
-
-        <!-- View: Action Center -->
-        <div id="view-action-center" class="view-content hidden">
-            <header class="mb-8">
-                <h2 class="text-3xl font-bold font-orbitron">自动化行动中心</h2>
-                <p class="text-gray-400">打通“洞察”到“行动”的最后一公里。创建、管理并监控您的自动化工作流。</p>
-            </header>
-             <div class="mb-6 text-right">
-                <button class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="openModal('workflowEditorModal')">
-                    + 创建新的工作流
-                </button>
-            </div>
-            <div id="workflow-list" class="space-y-6">
-                <!-- Workflow Card 1 -->
-                <div class="glassmorphism rounded-xl p-0 flex flex-col fade-in-up neon-border">
-                    <!-- Card Header -->
-                    <div class="p-4 flex justify-between items-start border-b border-cyan-500/20">
-                        <div>
-                            <h3 class="text-xl font-bold">舆情告警工作流</h3>
-                            <div class="flex items-center gap-2 mt-1">
-                                <span class="text-xs font-bold text-green-400">● 运行中</span>
-                                <label class="switch"><input type="checkbox" checked onchange="toggleWorkflowStatus(this, '舆情告警工作流')"><span class="slider"></span></label>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm text-gray-400">今日执行: <span class="font-bold text-white">18 次</span></p>
-                            <p class="text-sm text-green-400">成功率: <span class="font-bold">100%</span></p>
-                        </div>
-                    </div>
-                    <!-- Card Body -->
-                    <div class="p-4 flex flex-col lg:flex-row items-center gap-4 text-center">
-                        <div class="flex-1">
-                            <p class="text-sm text-gray-400 mb-1">触发器 (TRIGGER)</p>
-                            <div class="bg-gray-900 p-3 rounded-lg">
-                                <p class="font-mono">当 <span class="text-cyan-400">【汽车之家】</span>出现<span class="text-cyan-400">【“自燃”, “失控”】</span>关键词</p>
-                                <p class="font-mono text-lg font-bold text-gray-400">并且</p>
-                                <p class="font-mono">情感分析为 <span class="text-red-400">【强烈负面】</span></p>
-                            </div>
-                        </div>
-                        <svg class="w-8 h-8 text-cyan-400 transform lg:rotate-0 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                        <div class="flex-1">
-                            <p class="text-sm text-gray-400 mb-1">动作 (ACTION)</p>
-                            <div class="bg-gray-900 p-3 rounded-lg">
-                                <p class="font-mono">在 <span class="text-cyan-400">【钉钉】</span>创建 <span class="text-yellow-400">【高优】</span>工单</p>
-                                <p class="font-mono text-lg font-bold text-gray-400">并且</p>
-                                <p class="font-mono">@ <span class="text-purple-400">【公关部负责人】</span></p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Card Footer -->
-                    <div class="p-3 bg-gray-900/30 rounded-b-xl flex justify-between items-center">
-                        <p class="text-xs text-gray-500">上次执行: 5分钟前</p>
-                        <div class="flex gap-2">
-                            <button class="text-xs py-1 px-3 rounded bg-gray-700 hover:bg-gray-600" onclick="openModal('workflowEditorModal')">编辑</button>
-                            <button class="text-xs py-1 px-3 rounded bg-red-800/50 hover:bg-red-800/80" onclick="showToast('工作流已删除')">删除</button>
-                            <button class="text-xs py-1 px-3 rounded bg-cyan-600/50 hover:bg-cyan-600/80" onclick="openLogModal('舆情告警工作流')">查看日志</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Workflow Card 2 -->
-                <div class="glassmorphism rounded-xl p-0 flex flex-col fade-in-up neon-border-secondary" style="animation-delay: 0.2s;">
-                     <!-- Card Header -->
-                    <div class="p-4 flex justify-between items-start border-b border-purple-500/20">
-                        <div>
-                            <h3 class="text-xl font-bold">项目进度跟进工作流</h3>
-                            <div class="flex items-center gap-2 mt-1">
-                                <span class="text-xs font-bold text-green-400">● 运行中</span>
-                                <label class="switch"><input type="checkbox" checked onchange="toggleWorkflowStatus(this, '项目进度跟进工作流')"><span class="slider"></span></label>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm text-gray-400">今日执行: <span class="font-bold text-white">42 次</span></p>
-                            <p class="text-sm text-red-400">成功率: <span class="font-bold">95% (2次失败)</span></p>
-                        </div>
-                    </div>
-                    <!-- Card Body -->
-                    <div class="p-4 flex flex-col lg:flex-row items-center gap-4 text-center">
-                        <div class="flex-1">
-                            <p class="text-sm text-gray-400 mb-1">触发器 (TRIGGER)</p>
-                            <div class="bg-gray-900 p-3 rounded-lg">
-                                <p class="font-mono">当 <span class="text-cyan-400">【钉钉项目群】</span>提取的 <span class="text-cyan-400">【ToDo】</span></p>
-                                <p class="font-mono text-lg font-bold text-gray-400">在</p>
-                                <p class="font-mono">截止日期前 <span class="text-red-400">【24小时】</span>仍未完成</p>
-                            </div>
-                        </div>
-                        <svg class="w-8 h-8 text-secondary-color transform lg:rotate-0 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                        <div class="flex-1">
-                            <p class="text-sm text-gray-400 mb-1">动作 (ACTION)</p>
-                            <div class="bg-gray-900 p-3 rounded-lg">
-                                <p class="font-mono">在 <span class="text-cyan-400">【原群聊】</span>中自动发送提醒</p>
-                                <p class="font-mono text-lg font-bold text-gray-400">并且</p>
-                                <p class="font-mono">@ <span class="text-purple-400">【任务负责人】</span>和<span class="text-purple-400">【项目经理】</span></p>
-                            </div>
-                        </div>
-                    </div>
-                     <!-- Card Footer -->
-                    <div class="p-3 bg-gray-900/30 rounded-b-xl flex justify-between items-center">
-                        <p class="text-xs text-gray-500">上次执行: 12分钟前</p>
-                        <div class="flex gap-2">
-                            <button class="text-xs py-1 px-3 rounded bg-gray-700 hover:bg-gray-600" onclick="openModal('workflowEditorModal')">编辑</button>
-                            <button class="text-xs py-1 px-3 rounded bg-red-800/50 hover:bg-red-800/80" onclick="showToast('工作流已删除')">删除</button>
-                            <button class="text-xs py-1 px-3 rounded bg-cyan-600/50 hover:bg-cyan-600/80" onclick="openLogModal('项目进度跟进工作流')">查看日志</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- View: Knowledge Base -->
-        <div id="view-knowledge-base" class="view-content hidden">
-             <header class="mb-8">
-                <h2 class="text-3xl font-bold font-orbitron">动态知识库</h2>
-                <p class="text-gray-400">将非结构化的对话数据，转化为结构化、可复用的知识资产。</p>
-            </header>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 space-y-6">
-                    <div class="glassmorphism rounded-xl p-6 fade-in-up">
-                        <h3 class="text-xl font-bold mb-4">高频问题 (FAQ) & 解决方案</h3>
-                        <div id="faq-list" class="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-                             <div class="p-4 bg-gray-900/50 rounded-lg">
-                                <p class="font-bold text-cyan-300">Q: NE-900升级后，哨兵模式耗电过快怎么办？</p>
-                                <p class="text-sm text-gray-300 mt-2">A: 这是已知问题，临时解决方案是关闭行车记录仪的碰撞检测灵敏度。研发已在排查，预计下个版本修复。 <span class="text-xs text-gray-500">(来源: 售后支持群)</span></p>
-                            </div>
-                            <div class="p-4 bg-gray-900/50 rounded-lg">
-                                <p class="font-bold text-cyan-300">Q: 如何在车机上安装第三方应用？</p>
-                                <p class="text-sm text-gray-300 mt-2">A: 目前系统暂不支持。但有用户在论坛分享了通过开发者模式安装的方法，存在风险，不建议普通用户尝试。 <span class="text-xs text-gray-500">(来源: 汽车之家论坛)</span></p>
-                            </div>
-                            <div class="p-4 bg-gray-900/50 rounded-lg">
-                                <p class="font-bold text-cyan-300">Q: 预约充电为什么没有在设定时间启动？</p>
-                                <p class="text-sm text-gray-300 mt-2">A: 请检查车辆是否在线、地锁是否降下，以及充电枪是否正确连接。部分第三方充电桩可能存在兼容性问题。 <span class="text-xs text-gray-500">(来源: 用户APP反馈)</span></p>
-                            </div>
-                            <div class="p-4 bg-gray-900/50 rounded-lg">
-                                <p class="font-bold text-cyan-300">Q: 车辆的L2级辅助驾驶在雨雪天气会失效吗？</p>
-                                <p class="text-sm text-gray-300 mt-2">A: 在极端天气下，摄像头和雷达等传感器性能会受影响，系统可能会临时禁用或降低功能，这是安全设计。 <span class="text-xs text-gray-500">(来源: 技术支持群)</span></p>
-                            </div>
-                            <div class="p-4 bg-gray-900/50 rounded-lg">
-                                <p class="font-bold text-cyan-300">Q: 手机蓝牙钥匙感应不灵敏，经常需要掏出手机解锁？</p>
-                                <p class="text-sm text-gray-300 mt-2">A: 尝试在手机APP中重新校准蓝牙钥匙，并确保手机的蓝牙和定位服务权限已为应用开启。 <span class="text-xs text-gray-500">(来源: 知乎用户提问)</span></p>
-                            </div>
-                             <div class="p-4 bg-gray-900/50 rounded-lg">
-                                <p class="font-bold text-cyan-300">Q: 动力电池的质保政策是怎样的？</p>
-                                <p class="text-sm text-gray-300 mt-2">A: 我们提供8年或16万公里的三电系统质保，以先到者为准，具体条款请查阅您的购车合同或用户手册。 <span class="text-xs text-gray-500">(来源: 官网政策)</span></p>
-                            </div>
-                            <div class="p-4 bg-gray-900/50 rounded-lg">
-                                <p class="font-bold text-cyan-300">Q: 如何查看车辆的实时胎压？</p>
-                                <p class="text-sm text-gray-300 mt-2">A: 在中控屏的“车辆状态”应用中可以查看四个轮胎的实时压力和温度。当胎压异常时系统会自动告警。 <span class="text-xs text-gray-500">(来源: 产品说明文档)</span></p>
-                            </div>
-                             <div class="p-4 bg-gray-900/50 rounded-lg">
-                                <p class="font-bold text-cyan-300">Q: OTA升级失败卡在50%怎么办？</p>
-                                <p class="text-sm text-gray-300 mt-2">A: 请确保车辆停在网络信号良好的地方（如开阔的地面停车场），并保持电量在40%以上。如果多次尝试失败，请联系400客服或预约到店处理。 <span class="text-xs text-gray-500">(来源: 售后支持群)</span></p>
-                            </div>
-                        </div>
-                    </div>
-                     <div class="glassmorphism rounded-xl p-6 fade-in-up">
-                        <h3 class="text-xl font-bold mb-4">典型故障案例库</h3>
-                         <div id="case-library-list" class="space-y-4 max-h-[300px] overflow-y-auto pr-2">
-                            <div class="p-4 bg-gray-900/50 rounded-lg">
-                                <p class="font-bold text-yellow-300">案例#23041: 空调压缩机异响</p>
-                                <p class="text-sm text-gray-300 mt-2">现象: 在特定转速下，空调发出规律性高频噪音。诊断: 压缩机某批次支架存在设计缺陷。解决方案: 免费更换改进后的支架。 <span class="text-xs text-gray-500">(来源: 销服群)</span></p>
-                            </div>
-                            <div class="p-4 bg-gray-900/50 rounded-lg">
-                                <p class="font-bold text-yellow-300">案例#23052: 动力系统故障码 P0A7F (电池模块过热)</p>
-                                <p class="text-sm text-gray-300 mt-2">现象: 车辆在高速行驶后仪表盘报动力系统故障，加速受限。诊断: 读取故障码为P0A7F，检查发现3号电池模组温度传感器读数异常。解决方案: 更换3号模组的温度传感器，并对BMS进行软件重校准。 <span class="text-xs text-gray-500">(来源: 维修案例库)</span></p>
-                            </div>
-                            <div class="p-4 bg-gray-900/50 rounded-lg">
-                                <p class="font-bold text-yellow-300">案例#23061: 充电口盖无法打开</p>
-                                <p class="text-sm text-gray-300 mt-2">现象: 按下中控或钥匙上的充电口盖开启键，电机无反应。诊断: 检查发现控制充电口盖的执行器电机保险丝熔断。进一步排查发现电机本身因进水导致短路。解决方案: 更换充电口盖执行器电机总成，并加装新的防水密封圈。 <span class="text-xs text-gray-500">(来源: 售后通报)</span></p>
-                            </div>
-                            <div class="p-4 bg-gray-900/50 rounded-lg">
-                                <p class="font-bold text-yellow-300">案例#23075: 中控屏频繁黑屏重启</p>
-                                <p class="text-sm text-gray-300 mt-2">现象: 行车过程中，中控娱乐屏无故黑屏，数秒后自动重启。诊断: 确认车辆软件为最新版本。检查域控制器日志，发现内存溢出错误。解决方案: 通过OTA推送了针对性的补丁程序，优化了内存管理机制。 <span class="text-xs text-gray-500">(来源: 研发日志)</span></p>
-                            </div>
-                             <div class="p-4 bg-gray-900/50 rounded-lg">
-                                <p class="font-bold text-yellow-300">案例#23088: 车辆休眠后耗电异常</p>
-                                <p class="text-sm text-gray-300 mt-2">现象: 车辆锁定并静置一夜后，电量下降超过5%。诊断: 使用专用设备监测车辆休眠电流，发现网关模块（Gateway）未按预期进入深度休眠。解决方案: 重新刷写网关模块固件，解决了其无法进入低功耗模式的问题。 <span class="text-xs text-gray-500">(来源: 维修案例库)</span></p>
-                            </div>
-                         </div>
-                    </div>
-                </div>
-                <div class="lg:col-span-1 space-y-6">
-                    <div class="glassmorphism rounded-xl p-6 fade-in-up">
-                        <h3 class="text-xl font-bold mb-4">智能问答 & 专家查找</h3>
-                        <input type="text" placeholder="输入您的问题..." class="w-full bg-gray-800 border border-gray-700 rounded-md p-3 mb-4">
-                        <button class="btn-primary w-full py-2 rounded-lg" onclick="showToast('正在知识库和专家网络中检索...')">智能检索</button>
-                    </div>
-                    <div class="glassmorphism rounded-xl p-6 fade-in-up">
-                        <h3 class="text-xl font-bold mb-4">专家网络</h3>
-                        <p class="text-sm text-gray-400 mb-4">根据历史贡献，系统自动识别出的领域专家。</p>
-                        <div class="space-y-3">
-                            <div class="flex items-center gap-3">
-                                <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-08-04/8d9686f5-acc5-40a4-be4c-bab014273761.jpeg" class="w-10 h-10 rounded-full" alt="张伟头像">
-                                <div>
-                                    <p class="font-bold">张伟</p>
-                                    <p class="text-xs text-cyan-400">领域: 渲染引擎, GPU优化</p>
-                                </div>
-                            </div>
-                             <div class="flex items-center gap-3">
-                                <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-08-04/ccb10a50-61df-4dcd-9f39-47b62a1c8f8e.jpg" class="w-10 h-10 rounded-full" alt="李静头像">
-                                <div>
-                                    <p class="font-bold">李静</p>
-                                    <p class="text-xs text-cyan-400">领域: 电池BMS, 热管理</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-08-04/03e35c5d-3bbf-4f36-bee9-13d55b9b10b6.jpg" class="w-10 h-10 rounded-full" alt="王超头像">
-                                <div>
-                                    <p class="font-bold">王超</p>
-                                    <p class="text-xs text-cyan-400">领域: 智能座舱, HMI交互</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-08-04/937f5bb8-b5fc-42f6-985f-4a3cee95023d.jpeg" class="w-10 h-10 rounded-full" alt="陈悦头像">
-                                <div>
-                                    <p class="font-bold">陈悦</p>
-                                    <p class="text-xs text-cyan-400">领域: 自动驾驶, 传感器融合</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-      
-        <!-- View: Settings -->
-        <div id="view-settings" class="view-content hidden">
-            <header class="mb-8">
-                <h2 class="text-3xl font-bold font-orbitron">平台设置</h2>
-                <p class="text-gray-400">管理用户、角色、权限以及系统全局配置。</p>
-            </header>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="glassmorphism rounded-xl p-6 fade-in-up">
-                    <h3 class="text-xl font-bold mb-4">用户与角色管理</h3>
-                    <button class="btn-secondary py-2 px-4 rounded-lg mb-4" onclick="showToast('模拟操作：打开邀请用户界面')">+ 邀请新成员</button>
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center bg-gray-900/50 p-3 rounded">
-                            <span>admin@yourcompany.com (管理员)</span>
-                            <button class="text-xs text-red-400 hover:underline" onclick="showToast('操作成功')">移除</button>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-900/50 p-3 rounded">
-                            <span>zhang.wei@yourcompany.com (成员)</span>
-                            <button class="text-xs text-red-400 hover:underline" onclick="showToast('操作成功')">移除</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="glassmorphism rounded-xl p-6 fade-in-up">
-                    <h3 class="text-xl font-bold mb-4">多租户体系 (SaaS)</h3>
-                    <p class="text-gray-400 mb-4">当前为 <span class="font-bold text-cyan-400">企业内部版</span>。升级到SaaS商业版可开启多租户隔离、计费管理等高级功能。</p>
-                    <button class="btn-primary w-full py-2 rounded-lg" onclick="showToast('已联系商务顾问')">了解商业版</button>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Add Data Source Modal -->
-    <div id="addDataSourceModal" class="modal-overlay">
-        <div class="modal-content glassmorphism rounded-xl w-full max-w-lg m-4">
-            <div class="p-6 border-b border-gray-800 flex justify-between items-center">
-                <h3 class="text-2xl font-bold font-orbitron">添加新的数据源</h3>
-                <button onclick="closeModal('addDataSourceModal')" class="text-gray-500 hover:text-white text-3xl leading-none">&times;</button>
-            </div>
-            <div class="p-6">
-                <form id="addDataSourceForm" class="space-y-4">
+            <div class="lg:col-span-1 glassmorphism rounded-xl p-4 flex flex-col fade-in-up" style="animation-delay: 0.1s;">
+                <h3 class="text-xl font-bold mb-4 neon-text-accent">2. 配置分析引擎</h3>
+                <div id="lab-config-panel" class="space-y-4">
                     <div>
-                        <label for="sourceName" class="block text-sm font-medium text-gray-300 mb-1">数据源名称</label>
-                        <input type="text" id="sourceName" name="sourceName" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400" placeholder="例如: 市场部舆情监控" required>
-                    </div>
-                    <div>
-                        <label for="sourceType" class="block text-sm font-medium text-gray-300 mb-1">数据源类型</label>
-                        <select id="sourceType" name="sourceType" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400">
-                            <option value="Webhook">通用 Webhook</option>
-                            <option value="Feishu">飞书</option>
-                            <option value="Slack">Slack</option>
-                            <option value="Custom API">自定义 API</option>
+                        <label class="block text-sm font-medium mb-1">选择AI能力 (生成对应指令)</label>
+                        <select id="lab-ai-task-select" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2">
+                            <option value="summary">文本摘要</option>
+                            <option value="todo">任务提取 (ToDo)</option>
+                            <option value="sentiment">情感与意图分析</option>
+                            <option value="ner">命名实体识别 (NER)</option>
+                            <option value="topic">主题建模</option>
+                            <option value="freeform">自由对话</option>
                         </select>
                     </div>
-                    <div>
-                        <label for="sourceDesc" class="block text-sm font-medium text-gray-300 mb-1">简要描述</label>
-                        <textarea id="sourceDesc" name="sourceDesc" rows="3" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400" placeholder="例如: 用于监控飞书上的客户反馈群"></textarea>
+                    <div id="lab-model-params" class="space-y-3 p-3 border border-gray-700 rounded-md">
                     </div>
-                </form>
+                </div>
+                <div class="mt-auto">
+                    <button id="lab-run-button" class="btn-primary w-full py-3 rounded-lg font-bold text-lg" onclick="runLabAnalysis()">
+                        运行分析
+                    </button>
+                </div>
             </div>
-            <div class="p-6 bg-gray-900/30 rounded-b-xl flex justify-end gap-4">
-                <button type="button" class="btn-secondary py-2 px-5 rounded-lg" onclick="closeModal('addDataSourceModal')">取消</button>
-                <button type="button" class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="addDataSource()">确认添加</button>
+
+            <div class="lg:col-span-1 glassmorphism rounded-xl p-4 flex flex-col fade-in-up" style="animation-delay: 0.2s;">
+                <h3 class="text-xl font-bold mb-4 neon-text-secondary">3. 分析结果</h3>
+                <div id="lab-output-container" class="w-full flex-grow bg-gray-900/50 border border-gray-700 rounded-md p-3 overflow-auto">
+                    <div id="lab-output-markdown" class="markdown-body"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Workflow Editor Modal -->
-    <div id="workflowEditorModal" class="modal-overlay workflow-editor-modal">
-        <div class="modal-content glassmorphism rounded-xl w-full max-w-7xl h-[90vh] m-4 flex flex-col">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0">
-                <div>
-                    <h3 class="text-2xl font-bold font-orbitron">可视化工作流编辑器</h3>
-                    <input id="workflowName" type="text" class="bg-transparent text-lg text-gray-300 border-b border-gray-600 focus:border-cyan-400 outline-none" value="新的工作流">
+
+    <div id="view-action-center" class="view-content hidden">
+        <header class="mb-8">
+            <h2 class="text-3xl font-bold font-orbitron">自动化行动中心</h2>
+            <p class="text-gray-400">打通“洞察”到“行动”的最后一公里。创建、管理并监控您的自动化工作流。</p>
+        </header>
+        <div class="mb-6 text-right">
+            <button class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="openModal('workflowEditorModal')">
+                + 创建新的工作流
+            </button>
+        </div>
+        <div id="workflow-list" class="space-y-6">
+            <div class="glassmorphism rounded-xl p-0 flex flex-col fade-in-up neon-border">
+                <div class="p-4 flex justify-between items-start border-b border-cyan-500/20">
+                    <div>
+                        <h3 class="text-xl font-bold">舆情告警工作流</h3>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-xs font-bold text-green-400">● 运行中</span>
+                            <label class="switch"><input type="checkbox" checked onchange="toggleWorkflowStatus(this, '舆情告警工作流')"><span class="slider"></span></label>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-400">今日执行: <span class="font-bold text-white">18 次</span></p>
+                        <p class="text-sm text-green-400">成功率: <span class="font-bold">100%</span></p>
+                    </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <button class="btn-secondary py-2 px-5 rounded-lg" onclick="closeModal('workflowEditorModal')">取消</button>
-                    <button class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="saveWorkflow()">保存并激活</button>
+                <div class="p-4 flex flex-col lg:flex-row items-center gap-4 text-center">
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-400 mb-1">触发器 (TRIGGER)</p>
+                        <div class="bg-gray-900 p-3 rounded-lg">
+                            <p class="font-mono">当 <span class="text-cyan-400">【汽车之家】</span>出现<span class="text-cyan-400">【“自燃”, “失控”】</span>关键词</p>
+                            <p class="font-mono text-lg font-bold text-gray-400">并且</p>
+                            <p class="font-mono">情感分析为 <span class="text-red-400">【强烈负面】</span></p>
+                        </div>
+                    </div>
+                    <svg class="w-8 h-8 text-cyan-400 transform lg:rotate-0 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-400 mb-1">动作 (ACTION)</p>
+                        <div class="bg-gray-900 p-3 rounded-lg">
+                            <p class="font-mono">在 <span class="text-cyan-400">【钉钉】</span>创建 <span class="text-yellow-400">【高优】</span>工单</p>
+                            <p class="font-mono text-lg font-bold text-gray-400">并且</p>
+                            <p class="font-mono">@ <span class="text-purple-400">【公关部负责人】</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 bg-gray-900/30 rounded-b-xl flex justify-between items-center">
+                    <p class="text-xs text-gray-500">上次执行: 5分钟前</p>
+                    <div class="flex gap-2">
+                        <button class="text-xs py-1 px-3 rounded bg-gray-700 hover:bg-gray-600" onclick="openModal('workflowEditorModal')">编辑</button>
+                        <button class="text-xs py-1 px-3 rounded bg-red-800/50 hover:bg-red-800/80" onclick="showToast('工作流已删除')">删除</button>
+                        <button class="text-xs py-1 px-3 rounded bg-cyan-600/50 hover:bg-cyan-600/80" onclick="openLogModal('舆情告警工作流')">查看日志</button>
+                    </div>
                 </div>
             </div>
-            <div class="flex-grow flex min-h-0">
-                <!-- Node Palette -->
-                <aside class="w-64 bg-gray-900/50 p-4 shrink-0 overflow-y-auto">
-                    <h4 class="font-bold text-lg mb-4 neon-text-primary">节点库</h4>
-                    <div class="space-y-4">
-                        <div>
-                            <h5 class="font-bold text-cyan-300 mb-2">触发器 (Triggers)</h5>
-                            <div class="space-y-2">
-                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'trigger-source')">
-                                    <p class="font-bold">数据源输入</p>
-                                    <p class="text-xs text-gray-400">当指定数据源有新消息时</p>
-                                </div>
-                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'trigger-schedule')">
-                                    <p class="font-bold">定时触发</p>
-                                    <p class="text-xs text-gray-400">在指定时间自动运行</p>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- NEW: AI Processor Nodes -->
-                        <div>
-                            <h5 class="font-bold text-accent-color mb-2">AI 处理器 (Processors)</h5>
-                            <div class="space-y-2">
-                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'ai-summary')">
-                                    <p class="font-bold">文本摘要</p>
-                                    <p class="text-xs text-gray-400">生成文本的核心摘要</p>
-                                </div>
-                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'ai-todo')">
-                                    <p class="font-bold">任务提取</p>
-                                    <p class="text-xs text-gray-400">从文本中识别待办事项</p>
-                                </div>
-                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'ai-sentiment')">
-                                    <p class="font-bold">情感分析</p>
-                                    <p class="text-xs text-gray-400">分析文本的情感与意图</p>
-                                </div>
-                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'ai-ner')">
-                                    <p class="font-bold">实体识别</p>
-                                    <p class="text-xs text-gray-400">提取人名、产品名等实体</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <h5 class="font-bold text-purple-300 mb-2">动作 (Actions)</h5>
-                            <div class="space-y-2">
-                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'action-notify')">
-                                    <p class="font-bold">发送钉钉通知</p>
-                                    <p class="text-xs text-gray-400">在指定群聊或@某人</p>
-                                </div>
-                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'action-todo')">
-                                    <p class="font-bold">创建待办事项</p>
-                                    <p class="text-xs text-gray-400">在任务中心创建ToDo</p>
-                                </div>
-                                <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'action-webhook')">
-                                    <p class="font-bold">调用 Webhook</p>
-                                    <p class="text-xs text-gray-400">向指定URL发送POST请求</p>
-                                </div>
-                            </div>
+
+            <div class="glassmorphism rounded-xl p-0 flex flex-col fade-in-up neon-border-secondary" style="animation-delay: 0.2s;">
+                <div class="p-4 flex justify-between items-start border-b border-purple-500/20">
+                    <div>
+                        <h3 class="text-xl font-bold">项目进度跟进工作流</h3>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-xs font-bold text-green-400">● 运行中</span>
+                            <label class="switch"><input type="checkbox" checked onchange="toggleWorkflowStatus(this, '项目进度跟进工作流')"><span class="slider"></span></label>
                         </div>
                     </div>
-                </aside>
-                <!-- Canvas -->
-                <main id="workflow-canvas" class="flex-grow relative" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" onclick="deselectAll(event)">
-                    <svg id="workflow-svg-layer"></svg>
-                    <!-- Nodes will be added here dynamically -->
-                </main>
-                <!-- Properties Panel -->
-                <aside id="properties-panel" class="w-72 bg-gray-900/50 p-4 shrink-0 overflow-y-auto hidden">
-                    <h4 class="font-bold text-lg mb-4 neon-text-secondary">节点配置</h4>
-                    <div id="properties-content">
-                        <!-- Properties form will be injected here -->
+                    <div class="text-right">
+                        <p class="text-sm text-gray-400">今日执行: <span class="font-bold text-white">42 次</span></p>
+                        <p class="text-sm text-red-400">成功率: <span class="font-bold">95% (2次失败)</span></p>
                     </div>
-                </aside>
+                </div>
+                <div class="p-4 flex flex-col lg:flex-row items-center gap-4 text-center">
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-400 mb-1">触发器 (TRIGGER)</p>
+                        <div class="bg-gray-900 p-3 rounded-lg">
+                            <p class="font-mono">当 <span class="text-cyan-400">【钉钉项目群】</span>提取的 <span class="text-cyan-400">【ToDo】</span></p>
+                            <p class="font-mono text-lg font-bold text-gray-400">在</p>
+                            <p class="font-mono">截止日期前 <span class="text-red-400">【24小时】</span>仍未完成</p>
+                        </div>
+                    </div>
+                    <svg class="w-8 h-8 text-secondary-color transform lg:rotate-0 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-400 mb-1">动作 (ACTION)</p>
+                        <div class="bg-gray-900 p-3 rounded-lg">
+                            <p class="font-mono">在 <span class="text-cyan-400">【原群聊】</span>中自动发送提醒</p>
+                            <p class="font-mono text-lg font-bold text-gray-400">并且</p>
+                            <p class="font-mono">@ <span class="text-purple-400">【任务负责人】</span>和<span class="text-purple-400">【项目经理】</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 bg-gray-900/30 rounded-b-xl flex justify-between items-center">
+                    <p class="text-xs text-gray-500">上次执行: 12分钟前</p>
+                    <div class="flex gap-2">
+                        <button class="text-xs py-1 px-3 rounded bg-gray-700 hover:bg-gray-600" onclick="openModal('workflowEditorModal')">编辑</button>
+                        <button class="text-xs py-1 px-3 rounded bg-red-800/50 hover:bg-red-800/80" onclick="showToast('工作流已删除')">删除</button>
+                        <button class="text-xs py-1 px-3 rounded bg-cyan-600/50 hover:bg-cyan-600/80" onclick="openLogModal('项目进度跟进工作流')">查看日志</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    
-    <!-- Workflow Log Modal -->
-    <div id="workflowLogModal" class="modal-overlay">
-        <div class="modal-content glassmorphism rounded-xl w-full max-w-4xl m-4 flex flex-col h-[80vh]">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0">
-                <div>
-                    <h3 class="text-2xl font-bold font-orbitron">执行日志</h3>
-                    <p id="logModalWorkflowName" class="text-sm text-cyan-400"></p>
+
+    <div id="view-knowledge-base" class="view-content hidden">
+        <header class="mb-8">
+            <h2 class="text-3xl font-bold font-orbitron">动态知识库</h2>
+            <p class="text-gray-400">将非结构化的对话数据，转化为结构化、可复用的知识资产。</p>
+        </header>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-6">
+                <div class="glassmorphism rounded-xl p-6 fade-in-up">
+                    <h3 class="text-xl font-bold mb-4">高频问题 (FAQ) & 解决方案</h3>
+                    <div id="faq-list" class="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                        <div class="p-4 bg-gray-900/50 rounded-lg">
+                            <p class="font-bold text-cyan-300">Q: NE-900升级后，哨兵模式耗电过快怎么办？</p>
+                            <p class="text-sm text-gray-300 mt-2">A: 这是已知问题，临时解决方案是关闭行车记录仪的碰撞检测灵敏度。研发已在排查，预计下个版本修复。 <span class="text-xs text-gray-500">(来源: 售后支持群)</span></p>
+                        </div>
+                        <div class="p-4 bg-gray-900/50 rounded-lg">
+                            <p class="font-bold text-cyan-300">Q: 如何在车机上安装第三方应用？</p>
+                            <p class="text-sm text-gray-300 mt-2">A: 目前系统暂不支持。但有用户在论坛分享了通过开发者模式安装的方法，存在风险，不建议普通用户尝试。 <span class="text-xs text-gray-500">(来源: 汽车之家论坛)</span></p>
+                        </div>
+                        <div class="p-4 bg-gray-900/50 rounded-lg">
+                            <p class="font-bold text-cyan-300">Q: 预约充电为什么没有在设定时间启动？</p>
+                            <p class="text-sm text-gray-300 mt-2">A: 请检查车辆是否在线、地锁是否降下，以及充电枪是否正确连接。部分第三方充电桩可能存在兼容性问题。 <span class="text-xs text-gray-500">(来源: 用户APP反馈)</span></p>
+                        </div>
+                        <div class="p-4 bg-gray-900/50 rounded-lg">
+                            <p class="font-bold text-cyan-300">Q: 车辆的L2级辅助驾驶在雨雪天气会失效吗？</p>
+                            <p class="text-sm text-gray-300 mt-2">A: 在极端天气下，摄像头和雷达等传感器性能会受影响，系统可能会临时禁用或降低功能，这是安全设计。 <span class="text-xs text-gray-500">(来源: 技术支持群)</span></p>
+                        </div>
+                        <div class="p-4 bg-gray-900/50 rounded-lg">
+                            <p class="font-bold text-cyan-300">Q: 手机蓝牙钥匙感应不灵敏，经常需要掏出手机解锁？</p>
+                            <p class="text-sm text-gray-300 mt-2">A: 尝试在手机APP中重新校准蓝牙钥匙，并确保手机的蓝牙和定位服务权限已为应用开启。 <span class="text-xs text-gray-500">(来源: 知乎用户提问)</span></p>
+                        </div>
+                        <div class="p-4 bg-gray-900/50 rounded-lg">
+                            <p class="font-bold text-cyan-300">Q: 动力电池的质保政策是怎样的？</p>
+                            <p class="text-sm text-gray-300 mt-2">A: 我们提供8年或16万公里的三电系统质保，以先到者为准，具体条款请查阅您的购车合同或用户手册。 <span class="text-xs text-gray-500">(来源: 官网政策)</span></p>
+                        </div>
+                        <div class="p-4 bg-gray-900/50 rounded-lg">
+                            <p class="font-bold text-cyan-300">Q: 如何查看车辆的实时胎压？</p>
+                            <p class="text-sm text-gray-300 mt-2">A: 在中控屏的“车辆状态”应用中可以查看四个轮胎的实时压力和温度。当胎压异常时系统会自动告警。 <span class="text-xs text-gray-500">(来源: 产品说明文档)</span></p>
+                        </div>
+                        <div class="p-4 bg-gray-900/50 rounded-lg">
+                            <p class="font-bold text-cyan-300">Q: OTA升级失败卡在50%怎么办？</p>
+                            <p class="text-sm text-gray-300 mt-2">A: 请确保车辆停在网络信号良好的地方（如开阔的地面停车场），并保持电量在40%以上。如果多次尝试失败，请联系400客服或预约到店处理。 <span class="text-xs text-gray-500">(来源: 售后支持群)</span></p>
+                        </div>
+                    </div>
                 </div>
-                <button onclick="closeModal('workflowLogModal')" class="text-gray-500 hover:text-white text-3xl leading-none">&times;</button>
+                <div class="glassmorphism rounded-xl p-6 fade-in-up">
+                    <h3 class="text-xl font-bold mb-4">典型故障案例库</h3>
+                    <div id="case-library-list" class="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                        <div class="p-4 bg-gray-900/50 rounded-lg">
+                            <p class="font-bold text-yellow-300">案例#23041: 空调压缩机异响</p>
+                            <p class="text-sm text-gray-300 mt-2">现象: 在特定转速下，空调发出规律性高频噪音。诊断: 压缩机某批次支架存在设计缺陷。解决方案: 免费更换改进后的支架。 <span class="text-xs text-gray-500">(来源: 销服群)</span></p>
+                        </div>
+                        <div class="p-4 bg-gray-900/50 rounded-lg">
+                            <p class="font-bold text-yellow-300">案例#23052: 动力系统故障码 P0A7F (电池模块过热)</p>
+                            <p class="text-sm text-gray-300 mt-2">现象: 车辆在高速行驶后仪表盘报动力系统故障，加速受限。诊断: 读取故障码为P0A7F，检查发现3号电池模组温度传感器读数异常。解决方案: 更换3号模组的温度传感器，并对BMS进行软件重校准。 <span class="text-xs text-gray-500">(来源: 维修案例库)</span></p>
+                        </div>
+                        <div class="p-4 bg-gray-900/50 rounded-lg">
+                            <p class="font-bold text-yellow-300">案例#23061: 充电口盖无法打开</p>
+                            <p class="text-sm text-gray-300 mt-2">现象: 按下中控或钥匙上的充电口盖开启键，电机无反应。诊断: 检查发现控制充电口盖的执行器电机保险丝熔断。进一步排查发现电机本身因进水导致短路。解决方案: 更换充电口盖执行器电机总成，并加装新的防水密封圈。 <span class="text-xs text-gray-500">(来源: 售后通报)</span></p>
+                        </div>
+                        <div class="p-4 bg-gray-900/50 rounded-lg">
+                            <p class="font-bold text-yellow-300">案例#23075: 中控屏频繁黑屏重启</p>
+                            <p class="text-sm text-gray-300 mt-2">现象: 行车过程中，中控娱乐屏无故黑屏，数秒后自动重启。诊断: 确认车辆软件为最新版本。检查域控制器日志，发现内存溢出错误。解决方案: 通过OTA推送了针对性的补丁程序，优化了内存管理机制。 <span class="text-xs text-gray-500">(来源: 研发日志)</span></p>
+                        </div>
+                        <div class="p-4 bg-gray-900/50 rounded-lg">
+                            <p class="font-bold text-yellow-300">案例#23088: 车辆休眠后耗电异常</p>
+                            <p class="text-sm text-gray-300 mt-2">现象: 车辆锁定并静置一夜后，电量下降超过5%。诊断: 使用专用设备监测车辆休眠电流，发现网关模块（Gateway）未按预期进入深度休眠。解决方案: 重新刷写网关模块固件，解决了其无法进入低功耗模式的问题。 <span class="text-xs text-gray-500">(来源: 维修案例库)</span></p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="p-4 flex-grow overflow-y-auto">
-                <table class="w-full text-sm text-left">
-                    <thead class="sticky top-0 bg-gray-900/50 backdrop-blur-sm">
-                        <tr>
-                            <th class="p-2 w-1/4">执行时间</th>
-                            <th class="p-2 w-1/6">结果</th>
-                            <th class="p-2 w-7/12">详细信息</th>
-                        </tr>
-                    </thead>
-                    <tbody id="log-table-body">
-                        <!-- Log rows will be injected here -->
-                    </tbody>
-                </table>
-            </div>
-             <div class="p-4 bg-gray-900/30 rounded-b-xl flex justify-end gap-4 shrink-0">
-                <button type="button" class="btn-secondary py-2 px-5 rounded-lg" onclick="closeModal('workflowLogModal')">关闭</button>
+            <div class="lg:col-span-1 space-y-6">
+                <div class="glassmorphism rounded-xl p-6 fade-in-up">
+                    <h3 class="text-xl font-bold mb-4">智能问答 & 专家查找</h3>
+                    <input type="text" placeholder="输入您的问题..." class="w-full bg-gray-800 border border-gray-700 rounded-md p-3 mb-4">
+                    <button class="btn-primary w-full py-2 rounded-lg" onclick="showToast('正在知识库和专家网络中检索...')">智能检索</button>
+                </div>
+                <div class="glassmorphism rounded-xl p-6 fade-in-up">
+                    <h3 class="text-xl font-bold mb-4">专家网络</h3>
+                    <p class="text-sm text-gray-400 mb-4">根据历史贡献，系统自动识别出的领域专家。</p>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-08-04/8d9686f5-acc5-40a4-be4c-bab014273761.jpeg" class="w-10 h-10 rounded-full" alt="张伟头像">
+                            <div>
+                                <p class="font-bold">张伟</p>
+                                <p class="text-xs text-cyan-400">领域: 渲染引擎, GPU优化</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-08-04/ccb10a50-61df-4dcd-9f39-47b62a1c8f8e.jpg" class="w-10 h-10 rounded-full" alt="李静头像">
+                            <div>
+                                <p class="font-bold">李静</p>
+                                <p class="text-xs text-cyan-400">领域: 电池BMS, 热管理</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-08-04/03e35c5d-3bbf-4f36-bee9-13d55b9b10b6.jpg" class="w-10 h-10 rounded-full" alt="王超头像">
+                            <div>
+                                <p class="font-bold">王超</p>
+                                <p class="text-xs text-cyan-400">领域: 智能座舱, HMI交互</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <img src="https://dingding-erdp.seres.cn/erdp-file/system/prod_env/2025-08-04/937f5bb8-b5fc-42f6-985f-4a3cee95023d.jpeg" class="w-10 h-10 rounded-full" alt="陈悦头像">
+                            <div>
+                                <p class="font-bold">陈悦</p>
+                                <p class="text-xs text-cyan-400">领域: 自动驾驶, 传感器融合</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <div id="view-settings" class="view-content hidden">
+        <header class="mb-8">
+            <h2 class="text-3xl font-bold font-orbitron">平台设置</h2>
+            <p class="text-gray-400">管理用户、角色、权限以及系统全局配置。</p>
+        </header>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glassmorphism rounded-xl p-6 fade-in-up">
+                <h3 class="text-xl font-bold mb-4">用户与角色管理</h3>
+                <button class="btn-secondary py-2 px-4 rounded-lg mb-4" onclick="showToast('模拟操作：打开邀请用户界面')">+ 邀请新成员</button>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center bg-gray-900/50 p-3 rounded">
+                        <span>admin@yourcompany.com (管理员)</span>
+                        <button class="text-xs text-red-400 hover:underline" onclick="showToast('操作成功')">移除</button>
+                    </div>
+                    <div class="flex justify-between items-center bg-gray-900/50 p-3 rounded">
+                        <span>zhang.wei@yourcompany.com (成员)</span>
+                        <button class="text-xs text-red-400 hover:underline" onclick="showToast('操作成功')">移除</button>
+                    </div>
+                </div>
+            </div>
+            <div class="glassmorphism rounded-xl p-6 fade-in-up">
+                <h3 class="text-xl font-bold mb-4">多租户体系 (SaaS)</h3>
+                <p class="text-gray-400 mb-4">当前为 <span class="font-bold text-cyan-400">企业内部版</span>。升级到SaaS商业版可开启多租户隔离、计费管理等高级功能。</p>
+                <button class="btn-primary w-full py-2 rounded-lg" onclick="showToast('已联系商务顾问')">了解商业版</button>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<div id="addDataSourceModal" class="modal-overlay">
+    <div class="modal-content glassmorphism rounded-xl w-full max-w-lg m-4">
+        <div class="p-6 border-b border-gray-800 flex justify-between items-center">
+            <h3 class="text-2xl font-bold font-orbitron">添加新的数据源</h3>
+            <button onclick="closeModal('addDataSourceModal')" class="text-gray-500 hover:text-white text-3xl leading-none">&times;</button>
+        </div>
+        <div class="p-6">
+            <form id="addDataSourceForm" class="space-y-4">
+                <div>
+                    <label for="sourceName" class="block text-sm font-medium text-gray-300 mb-1">数据源名称</label>
+                    <input type="text" id="sourceName" name="sourceName" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400" placeholder="例如: 市场部舆情监控" required>
+                </div>
+                <div>
+                    <label for="sourceType" class="block text-sm font-medium text-gray-300 mb-1">数据源类型</label>
+                    <select id="sourceType" name="sourceType" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400">
+                        <option value="Webhook">通用 Webhook</option>
+                        <option value="Feishu">飞书</option>
+                        <option value="Slack">Slack</option>
+                        <option value="Custom API">自定义 API</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="sourceDesc" class="block text-sm font-medium text-gray-300 mb-1">简要描述</label>
+                    <textarea id="sourceDesc" name="sourceDesc" rows="3" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400" placeholder="例如: 用于监控飞书上的客户反馈群"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="p-6 bg-gray-900/30 rounded-b-xl flex justify-end gap-4">
+            <button type="button" class="btn-secondary py-2 px-5 rounded-lg" onclick="closeModal('addDataSourceModal')">取消</button>
+            <button type="button" class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="addDataSource()">确认添加</button>
+        </div>
+    </div>
+</div>
+
+<div id="workflowEditorModal" class="modal-overlay workflow-editor-modal">
+    <div class="modal-content glassmorphism rounded-xl w-full max-w-7xl h-[90vh] m-4 flex flex-col">
+        <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0">
+            <div>
+                <h3 class="text-2xl font-bold font-orbitron">可视化工作流编辑器</h3>
+                <input id="workflowName" type="text" class="bg-transparent text-lg text-gray-300 border-b border-gray-600 focus:border-cyan-400 outline-none" value="新的工作流">
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="btn-secondary py-2 px-5 rounded-lg" onclick="closeModal('workflowEditorModal')">取消</button>
+                <button class="btn-primary py-2 px-5 rounded-lg font-bold" onclick="saveWorkflow()">保存并激活</button>
+            </div>
+        </div>
+        <div class="flex-grow flex min-h-0">
+            <aside class="w-64 bg-gray-900/50 p-4 shrink-0 overflow-y-auto">
+                <h4 class="font-bold text-lg mb-4 neon-text-primary">节点库</h4>
+                <div class="space-y-4">
+                    <div>
+                        <h5 class="font-bold text-cyan-300 mb-2">触发器 (Triggers)</h5>
+                        <div class="space-y-2">
+                            <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'trigger-source')">
+                                <p class="font-bold">数据源输入</p>
+                                <p class="text-xs text-gray-400">当指定数据源有新消息时</p>
+                            </div>
+                            <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'trigger-schedule')">
+                                <p class="font-bold">定时触发</p>
+                                <p class="text-xs text-gray-400">在指定时间自动运行</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="font-bold text-accent-color mb-2">AI 处理器 (Processors)</h5>
+                        <div class="space-y-2">
+                            <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'ai-summary')">
+                                <p class="font-bold">文本摘要</p>
+                                <p class="text-xs text-gray-400">生成文本的核心摘要</p>
+                            </div>
+                            <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'ai-todo')">
+                                <p class="font-bold">任务提取</p>
+                                <p class="text-xs text-gray-400">从文本中识别待办事项</p>
+                            </div>
+                            <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'ai-sentiment')">
+                                <p class="font-bold">情感分析</p>
+                                <p class="text-xs text-gray-400">分析文本的情感与意图</p>
+                            </div>
+                            <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'ai-ner')">
+                                <p class="font-bold">实体识别</p>
+                                <p class="text-xs text-gray-400">提取人名、产品名等实体</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="font-bold text-purple-300 mb-2">动作 (Actions)</h5>
+                        <div class="space-y-2">
+                            <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'action-notify')">
+                                <p class="font-bold">发送钉钉通知</p>
+                                <p class="text-xs text-gray-400">在指定群聊或@某人</p>
+                            </div>
+                            <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'action-todo')">
+                                <p class="font-bold">创建待办事项</p>
+                                <p class="text-xs text-gray-400">在任务中心创建ToDo</p>
+                            </div>
+                            <div class="workflow-node bg-gray-800 p-3 rounded-lg" draggable="true" ondragstart="handleDragStart(event, 'action-webhook')">
+                                <p class="font-bold">调用 Webhook</p>
+                                <p class="text-xs text-gray-400">向指定URL发送POST请求</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            <main id="workflow-canvas" class="flex-grow relative" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" onclick="deselectAll(event)">
+                <svg id="workflow-svg-layer"></svg>
+            </main>
+            <aside id="properties-panel" class="w-72 bg-gray-900/50 p-4 shrink-0 overflow-y-auto hidden">
+                <h4 class="font-bold text-lg mb-4 neon-text-secondary">节点配置</h4>
+                <div id="properties-content">
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+
+<div id="workflowLogModal" class="modal-overlay">
+    <div class="modal-content glassmorphism rounded-xl w-full max-w-4xl m-4 flex flex-col h-[80vh]">
+        <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0">
+            <div>
+                <h3 class="text-2xl font-bold font-orbitron">执行日志</h3>
+                <p id="logModalWorkflowName" class="text-sm text-cyan-400"></p>
+            </div>
+            <button onclick="closeModal('workflowLogModal')" class="text-gray-500 hover:text-white text-3xl leading-none">&times;</button>
+        </div>
+        <div class="p-4 flex-grow overflow-y-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="sticky top-0 bg-gray-900/50 backdrop-blur-sm">
+                <tr>
+                    <th class="p-2 w-1/4">执行时间</th>
+                    <th class="p-2 w-1/6">结果</th>
+                    <th class="p-2 w-7/12">详细信息</th>
+                </tr>
+                </thead>
+                <tbody id="log-table-body">
+                </tbody>
+            </table>
+        </div>
+        <div class="p-4 bg-gray-900/30 rounded-b-xl flex justify-end gap-4 shrink-0">
+            <button type="button" class="btn-secondary py-2 px-5 rounded-lg" onclick="closeModal('workflowLogModal')">关闭</button>
+        </div>
+    </div>
+</div>
 
 
 
@@ -1053,13 +1015,13 @@
             item.classList.remove('active');
         });
         element.classList.add('active');
-        
+
         const viewContent = document.getElementById('view-' + viewId);
         const animatedElements = viewContent.querySelectorAll('.fade-in-up');
         animatedElements.forEach(el => {
             el.style.animation = 'none';
             el.offsetHeight; /* trigger reflow */
-            el.style.animation = null; 
+            el.style.animation = null;
         });
 
         if (viewId === 'dashboard') {
@@ -1138,12 +1100,12 @@
             <p class="text-xs text-gray-400 flex-grow">${sourceDesc || '暂无描述'}</p>
             <button class="btn-secondary mt-4 w-full py-2 rounded-lg" onclick="showToast('配置成功')">配置</button>
         `;
-        
+
         grid.appendChild(newCard);
         closeModal('addDataSourceModal');
         showToast(`数据源 "${sourceName}" 添加成功！`);
     }
-    
+
     // --- Insight Lab Logic (MODIFIED FOR STREAMING API) ---
     const labTaskSelect = document.getElementById('lab-ai-task-select');
     const labParamsContainer = document.getElementById('lab-model-params');
@@ -1174,7 +1136,7 @@
             name: '命名实体识别 (NER)',
             prompt: '你是一个命名实体识别(NER)工具。请从文本中提取出指定类型的实体，例如人名(PER)、地名(LOC)、组织机构名(ORG)、产品名(PROD)等。请以JSON格式返回结果。',
             params: [
-                 { id: 'ner-types', label: '自定义实体 (逗号分隔)', type: 'text', placeholder: 'BUG编号, 项目代号' }
+                { id: 'ner-types', label: '自定义实体 (逗号分隔)', type: 'text', placeholder: 'BUG编号, 项目代号' }
             ]
         },
         topic: {
@@ -1220,7 +1182,7 @@
             showToast("请输入需要分析的文本", "error");
             return;
         }
-        
+
         labRunButton.textContent = "分析中...";
         labRunButton.disabled = true;
         labOutputMarkdown.innerHTML = ''; // 清空上次结果
@@ -1232,7 +1194,7 @@
 
         const selectedTask = labTaskSelect.value;
         const systemPrompt = labTaskPrompts[selectedTask].prompt;
-        
+
         // 组合最终的用户输入
         let userContent = text;
         if (selectedTask === 'summary') {
@@ -1271,7 +1233,7 @@
                 if (done) {
                     break;
                 }
-                
+
                 const chunk = decoder.decode(value, { stream: true });
                 const lines = chunk.split('\n').filter(line => line.trim() !== '');
 
@@ -1333,7 +1295,7 @@
             showToast(`工作流 "${workflowName}" 已暂停`);
         }
     }
-    
+
     // ==================== 删除工作流 ====================
     // 此函数用于删除工作流卡片。
     function deleteWorkflow(button) {
@@ -1369,7 +1331,7 @@
         logBody.innerHTML = ''; // Clear previous logs
 
         const logs = mockLogs[workflowName] || [{ time: new Date().toLocaleString(), status: '信息', message: '暂无该工作流的执行日志。' }];
-        
+
         logs.forEach(log => {
             const row = document.createElement('tr');
             const statusClass = log.status === '成功' ? 'text-green-400' : (log.status === '失败' ? 'text-red-400' : 'text-gray-400');
@@ -1401,17 +1363,105 @@
     let tempLine = null;
     let startConnector = null;
 
+    // ==================== [MODIFIED] Workflow Node Configurations ====================
+    // 重构了 nodeConfigs，为每个节点添加了 propertiesSchema，用于定义配置面板的结构和行为。
     const nodeConfigs = {
-        'trigger-source': { title: '数据源输入', colorClass: 'text-cyan-300', borderColor: 'border-cyan-400', properties: { source: 'dingtalk-group-1' } },
-        'trigger-schedule': { title: '定时触发', colorClass: 'text-cyan-300', borderColor: 'border-cyan-400', properties: { cron: '0 0 * * *' } },
-        'ai-summary': { title: '文本摘要', colorClass: 'text-accent-color', borderColor: 'border-accent-color', properties: { type: '通用摘要', length: '中等' } },
-        'ai-todo': { title: '任务提取', colorClass: 'text-accent-color', borderColor: 'border-accent-color', properties: { mode: '智能提取' } },
-        'ai-sentiment': { title: '情感分析', colorClass: 'text-accent-color', borderColor: 'border-accent-color', properties: { granularity: '细粒度情感+意图' } },
-        'ai-ner': { title: '实体识别', colorClass: 'text-accent-color', borderColor: 'border-accent-color', properties: { customTypes: 'BUG编号, 项目代号' } },
-        'action-notify': { title: '发送钉钉通知', colorClass: 'text-purple-300', borderColor: 'border-purple-400', properties: { channel: '#general', message: '来自OASIS的通知: {{input.summary}}' } },
-        'action-todo': { title: '创建待办事项', colorClass: 'text-purple-300', borderColor: 'border-purple-400', properties: { title: '{{input.task}}', assignee: '{{input.assignee}}' } },
-        'action-webhook': { title: '调用 Webhook', colorClass: 'text-purple-300', borderColor: 'border-purple-400', properties: { url: 'https://api.example.com/hook', payload: '{{input}}' } },
+        'trigger-source': {
+            title: 'MongoDB 数据源输入',
+            colorClass: 'text-cyan-300',
+            borderColor: 'border-cyan-400',
+            // [NEW] propertiesSchema 定义了配置面板的字段
+            propertiesSchema: [
+                { key: 'uri', label: 'MongoDB URI', inputType: 'text' },
+                { key: 'username', label: '用户名', inputType: 'text' },
+                { key: 'password', label: '密码', inputType: 'password' },
+                { key: 'database', label: '数据库名', inputType: 'text' },
+                { key: 'collection', label: '集合名 (表名)', inputType: 'text' },
+            ],
+            // [MODIFIED] 默认属性，与 schema 对应
+            properties: { uri: 'mongodb://localhost:27017', username: 'user', password: 'password', database: 'prod_db', collection: 'user_feedback' }
+        },
+        'trigger-schedule': {
+            title: '定时触发',
+            colorClass: 'text-cyan-300',
+            borderColor: 'border-cyan-400',
+            propertiesSchema: [
+                { key: 'cron', label: 'Cron 表达式', inputType: 'text' }
+            ],
+            properties: { cron: '0 0 * * *' }
+        },
+        'ai-summary': {
+            title: '文本摘要',
+            colorClass: 'text-accent-color',
+            borderColor: 'border-accent-color',
+            // [NEW] 添加了包含联动逻辑的 schema
+            propertiesSchema: [
+                { key: 'type', label: '摘要类型', inputType: 'select', options: ['通用摘要', '舆情摘要', '会议纪要'] },
+                { key: 'length', label: '摘要长度', inputType: 'select', options: ['较短', '中等', '较长'], dependsOn: { key: 'type', value: '通用摘要' } },
+                { key: 'key_points', label: '关注焦点', inputType: 'text', placeholder: '例如: 电池安全, 智能座舱', dependsOn: { key: 'type', value: '舆情摘要' } }
+            ],
+            // [MODIFIED] 默认属性，与 schema 对应
+            properties: { type: '通用摘要', length: '中等', key_points: '' }
+        },
+        'ai-todo': {
+            title: '任务提取',
+            colorClass: 'text-accent-color',
+            borderColor: 'border-accent-color',
+            propertiesSchema: [
+                { key: 'mode', label: '提取模式', inputType: 'select', options: ['智能提取', '严格模式'] }
+            ],
+            properties: { mode: '智能提取' }
+        },
+        'ai-sentiment': {
+            title: '情感分析',
+            colorClass: 'text-accent-color',
+            borderColor: 'border-accent-color',
+            propertiesSchema: [
+                { key: 'granularity', label: '分析粒度', inputType: 'select', options: ['粗粒度情感', '细粒度情感+意图'] }
+            ],
+            properties: { granularity: '细粒度情感+意图' }
+        },
+        'ai-ner': {
+            title: '实体识别',
+            colorClass: 'text-accent-color',
+            borderColor: 'border-accent-color',
+            propertiesSchema: [
+                { key: 'customTypes', label: '自定义实体类型', inputType: 'text', placeholder: 'BUG编号, 项目代号' }
+            ],
+            properties: { customTypes: 'BUG编号, 项目代号' }
+        },
+        'action-notify': {
+            title: '发送钉钉通知',
+            colorClass: 'text-purple-300',
+            borderColor: 'border-purple-400',
+            propertiesSchema: [
+                { key: 'channel', label: '群聊/频道', inputType: 'text' },
+                { key: 'message', label: '消息内容 (支持变量)', inputType: 'textarea' }
+            ],
+            properties: { channel: '#general', message: '来自OASIS的通知: {{input.summary}}' }
+        },
+        'action-todo': {
+            title: '创建待办事项',
+            colorClass: 'text-purple-300',
+            borderColor: 'border-purple-400',
+            propertiesSchema: [
+                { key: 'title', label: '待办标题 (支持变量)', inputType: 'text' },
+                { key: 'assignee', label: '负责人 (支持变量)', inputType: 'text' }
+            ],
+            properties: { title: '{{input.task}}', assignee: '{{input.assignee}}' }
+        },
+        'action-webhook': {
+            title: '调用 Webhook',
+            colorClass: 'text-purple-300',
+            borderColor: 'border-purple-400',
+            propertiesSchema: [
+                { key: 'url', label: 'Webhook URL', inputType: 'text' },
+                { key: 'payload', label: 'Payload (JSON, 支持变量)', inputType: 'textarea' }
+            ],
+            properties: { url: 'https://api.example.com/hook', payload: '{{input}}' }
+        },
     };
+    // =================================================================================
 
     function handleDragStart(event, nodeType) {
         event.dataTransfer.setData('node-type', nodeType);
@@ -1435,14 +1485,15 @@
     function createNode(type, x, y) {
         const nodeId = `node-${nodeIdCounter++}`;
         const config = nodeConfigs[type];
-        const nodeData = { id: nodeId, type, x, y, properties: { ...config.properties } };
-        
+        // [MODIFIED] 使用深拷贝创建独立的属性对象，防止所有实例共享引用
+        const nodeData = { id: nodeId, type, x, y, properties: JSON.parse(JSON.stringify(config.properties)) };
+
         const nodeElement = document.createElement('div');
         nodeElement.id = nodeId;
         nodeElement.className = 'canvas-node glassmorphism p-3 rounded-lg w-52';
         nodeElement.style.left = `${x}px`;
         nodeElement.style.top = `${y}px`;
-        
+
         nodeElement.innerHTML = `
             <p class="font-bold text-sm ${config.colorClass}">${config.title}</p>
             <p id="desc-${nodeId}" class="text-xs text-gray-400">未配置</p>
@@ -1459,7 +1510,7 @@
     }
 
     function selectElement(elementData) {
-        deselectAll(); 
+        deselectAll();
         selectedElement = elementData;
         if(elementData.id) { // It's a node
             document.getElementById(elementData.id).classList.add('selected');
@@ -1469,12 +1520,12 @@
             updateConnections();
         }
     }
-    
+
     function deselectAll(event) {
         if (event && event.target !== canvas && !event.target.closest('svg')) {
             return;
         }
-        
+
         if (selectedElement) {
             if(selectedElement.id) { // Node
                 document.getElementById(selectedElement.id)?.classList.remove('selected');
@@ -1489,34 +1540,34 @@
         if (e.target.classList.contains('node-connector')) return;
         e.preventDefault();
         const nodeElement = e.currentTarget;
-        
+
         const nodeData = nodes.find(n => n.id === nodeElement.id);
         if (!nodeData) return;
 
-        selectElement(nodeData); 
+        selectElement(nodeData);
         isDraggingNode = true;
-        
+
         dragOffsetX = e.clientX - nodeElement.offsetLeft;
         dragOffsetY = e.clientY - nodeElement.offsetTop;
-        
+
         document.onmousemove = (moveEvent) => {
             if (!isDraggingNode) return;
-            
+
             let x = moveEvent.clientX - dragOffsetX;
             let y = moveEvent.clientY - dragOffsetY;
-            
+
             x = Math.max(0, Math.min(x, canvas.clientWidth - nodeElement.offsetWidth));
             y = Math.max(0, Math.min(y, canvas.clientHeight - nodeElement.offsetHeight));
 
             nodeElement.style.left = `${x}px`;
             nodeElement.style.top = `${y}px`;
-            
+
             nodeData.x = x;
             nodeData.y = y;
-            
+
             updateConnections();
         };
-        
+
         document.onmouseup = () => {
             isDraggingNode = false;
             document.onmousemove = null;
@@ -1524,49 +1575,110 @@
         };
     }
 
+    // ==================== [REWRITTEN] Render Properties Function ====================
+    // 重写了 renderProperties 函数，使其能够根据 nodeConfigs 中的 schema 动态生成表单，
+    // 并处理字段之间的依赖关系（联动效果）。
     function renderProperties(nodeData) {
-        let formHtml = `<p class="mb-4 text-sm">正在配置: <span class="font-bold">${nodeData.id}</span></p>`;
-        for (const key in nodeData.properties) {
-            const value = nodeData.properties[key];
-            // A more robust solution would use a schema to define input types
-            let inputType = 'text';
-            if (key.includes('payload') || key.includes('message')) {
-                formHtml += `
-                    <div class="mb-3">
-                        <label class="block text-xs font-medium text-gray-400 mb-1">${key}</label>
-                        <textarea data-property="${key}" rows="3" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-sm resize-none">${value}</textarea>
-                    </div>
-                `;
-            } else {
-                 formHtml += `
-                    <div class="mb-3">
-                        <label class="block text-xs font-medium text-gray-400 mb-1">${key}</label>
-                        <input type="text" data-property="${key}" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-sm" value="${value}">
-                    </div>
-                `;
-            }
+        const config = nodeConfigs[nodeData.type];
+        if (!config || !config.propertiesSchema) {
+            propertiesContent.innerHTML = `<p class="text-gray-500">该节点无需配置。</p>`;
+            return;
         }
+
+        let formHtml = `<p class="mb-4 text-sm">正在配置: <span class="font-bold">${nodeData.id}</span></p>`;
+
+        config.propertiesSchema.forEach(propSchema => {
+            // 检查该字段是否有依赖项，并且依赖项的当前值是否满足条件
+            if (propSchema.dependsOn) {
+                const depKey = propSchema.dependsOn.key;
+                const depValue = propSchema.dependsOn.value;
+                if (nodeData.properties[depKey] !== depValue) {
+                    return; // 如果依赖不满足，则不渲染此字段
+                }
+            }
+
+            const key = propSchema.key;
+            const value = nodeData.properties[key];
+            const label = propSchema.label;
+
+            formHtml += `<div class="mb-3">
+                <label class="block text-xs font-medium text-gray-400 mb-1">${label}</label>`;
+
+            switch (propSchema.inputType) {
+                case 'select':
+                    formHtml += `<select data-property="${key}" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-sm">
+                        ${propSchema.options.map(opt => `<option value="${opt}" ${value === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                    </select>`;
+                    break;
+                case 'textarea':
+                    formHtml += `<textarea data-property="${key}" rows="3" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-sm resize-none">${value}</textarea>`;
+                    break;
+                case 'password':
+                    formHtml += `<input type="password" data-property="${key}" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-sm" value="${value}">`;
+                    break;
+                default: // 'text' and others
+                    formHtml += `<input type="text" data-property="${key}" class="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-sm" value="${value}" placeholder="${propSchema.placeholder || ''}">`;
+            }
+            formHtml += `</div>`;
+        });
+
         propertiesContent.innerHTML = formHtml;
-        propertiesContent.querySelectorAll('input, textarea').forEach(input => {
+        propertiesContent.querySelectorAll('input, textarea, select').forEach(input => {
             input.addEventListener('input', (e) => {
-                nodeData.properties[e.target.dataset.property] = e.target.value;
+                const key = e.target.dataset.property;
+                const newValue = e.target.value;
+                nodeData.properties[key] = newValue;
+
                 updateNodeDescription(nodeData);
+
+                // 如果改变的字段是其他字段的依赖项，则重新渲染整个配置面板以实现联动
+                const isDependency = config.propertiesSchema.some(p => p.dependsOn && p.dependsOn.key === key);
+                if (isDependency) {
+                    renderProperties(nodeData);
+                }
             });
         });
     }
-    
+    // =================================================================================
+
+    // ==================== [MODIFIED] Update Node Description Function ====================
+    // 修改了此函数，使其能根据不同节点的新属性，在画布上显示更有意义的描述信息。
     function updateNodeDescription(nodeData) {
         const descElement = document.getElementById(`desc-${nodeData.id}`);
-        const firstPropValue = Object.values(nodeData.properties)[0];
-        let descText = `${firstPropValue}`.substring(0, 20) + (`${firstPropValue}`.length > 20 ? '...' : '');
-        descElement.textContent = descText || '已配置';
+        if (!descElement) return;
+
+        let descText = '已配置';
+        const props = nodeData.properties;
+
+        switch (nodeData.type) {
+            case 'trigger-source':
+                descText = `db: ${props.database}, coll: ${props.collection}`;
+                break;
+            case 'ai-summary':
+                descText = props.type;
+                if (props.type === '通用摘要') {
+                    descText += ` (${props.length})`;
+                }
+                break;
+            default:
+                // 对于其他节点，显示第一个属性的值作为简要描述
+                const firstPropValue = Object.values(props)[0];
+                if (firstPropValue) {
+                    descText = `${firstPropValue}`.substring(0, 20) + (`${firstPropValue}`.length > 20 ? '...' : '');
+                }
+                break;
+        }
+
+        descElement.textContent = descText;
     }
+    // =================================================================================
+
 
     canvas.addEventListener('mousedown', (e) => {
         if (e.target.classList.contains('node-connector')) {
             startConnector = e.target;
             e.stopPropagation();
-            
+
             tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             tempLine.setAttribute('stroke-dasharray', '5,5');
             svgLayer.appendChild(tempLine);
@@ -1631,7 +1743,7 @@
             const startY = fromNodeEl.offsetTop + fromNodeEl.offsetHeight / 2;
             const endX = toNodeEl.offsetLeft;
             const endY = toNodeEl.offsetTop + toNodeEl.offsetHeight / 2;
-            
+
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             const d = `M ${startX} ${startY} C ${startX + 70} ${startY}, ${endX - 70} ${endY}, ${endX} ${endY}`;
             path.setAttribute('d', d);
@@ -1649,7 +1761,7 @@
             svgLayer.appendChild(path);
         });
     }
-    
+
     function deleteSelected() {
         let deleted = false;
         if (selectedElement) {
@@ -1665,7 +1777,7 @@
             selectedElement = null;
             propertiesPanel.classList.add('hidden');
         }
-        
+
         if (deleted) {
             showToast('已删除所选元素');
             updateConnections();
@@ -1701,7 +1813,6 @@
         const actionDesc = actionNode ? Object.values(actionNode.properties).join(', ').substring(0, 50) + '...' : 'N/A';
 
         newCard.innerHTML = `
-            <!-- Card Header -->
             <div class="p-4 flex justify-between items-start border-b border-green-500/20">
                 <div>
                     <h3 class="text-xl font-bold">${workflowData.name}</h3>
@@ -1715,7 +1826,6 @@
                     <p class="text-sm text-green-400">成功率: <span class="font-bold">N/A</span></p>
                 </div>
             </div>
-            <!-- Card Body -->
             <div class="p-4 flex flex-col lg:flex-row items-center gap-4 text-center">
                 <div class="flex-1">
                     <p class="text-sm text-gray-400 mb-1">触发器 (TRIGGER)</p>
@@ -1733,7 +1843,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Card Footer -->
             <div class="p-3 bg-gray-900/30 rounded-b-xl flex justify-between items-center">
                 <p class="text-xs text-gray-500">上次执行: 从未</p>
                 <div class="flex gap-2">
@@ -1756,7 +1865,7 @@
             showToast('错误: 工作流不完整，请至少连接两个节点', 'error');
             return;
         }
-        
+
         // 1. 创建一个包含当前工作流所有信息的数据对象
         const workflowData = {
             id: `workflow-${Date.now()}`, // 使用时间戳确保ID唯一
@@ -1767,7 +1876,7 @@
 
         // 2. 调用新函数来创建并添加卡片到UI
         addWorkflowCard(workflowData);
-        
+
         showToast(`工作流 "${workflowName}" 已保存并激活!`);
         closeModal('workflowEditorModal');
 
@@ -1776,14 +1885,14 @@
         connections = [];
         nodeIdCounter = 0;
         selectedElement = null;
-        
+
         // 从DOM中移除画布上的所有节点
         const canvasNodes = canvas.querySelectorAll('.canvas-node');
         canvasNodes.forEach(node => node.remove());
-        
+
         // 清空SVG层上的所有连接线
         svgLayer.innerHTML = '';
-        
+
         // 重置工作流名称输入框
         document.getElementById('workflowName').value = '新的工作流';
         propertiesPanel.classList.add('hidden');
@@ -1850,7 +1959,7 @@
         const container = document.getElementById('wordCloud');
         if (!container || container.clientWidth === 0 || container.clientHeight === 0) return;
 
-        d3.select("#wordCloud").selectAll("*").remove(); 
+        d3.select("#wordCloud").selectAll("*").remove();
         const layout = d3.layout.cloud()
             .size([container.clientWidth, container.clientHeight])
             .words(words.map(d => ({...d})))
@@ -1870,7 +1979,7 @@
                 .text(d => d.text).style("opacity", 0).transition().duration(1000).style("opacity", 1);
         }
     }
-    
+
     const debouncedRenderWordCloud = debounce(renderWordCloud, 100);
 
     // Initial setup
